@@ -1,0 +1,340 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using AstirOdysseusKos.Web.Models 
+@{
+    Layout = null;
+    var currentCulture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
+    var allCultures = Model.Root().Cultures;
+
+    var root = Model.Root();
+    var siteLogoImg="";
+    var bookingUrl="";
+    var contactTelNo="";
+    var contactEmail="";
+    var classBody="";
+
+    if (root.Value<IPublishedContent>("SiteLogo") != null){
+        siteLogoImg = root.Value<IPublishedContent>("SiteLogo").Url();
+    }
+    if (root.HasValue("bookingLink")){
+        bookingUrl=root.Value("bookingLink").ToString();
+    }
+    if (root.HasValue("contactTelephone")){
+        contactTelNo=root.Value("contactTelephone").ToString();
+    }
+    if (root.HasValue("contactEmail")){
+        contactEmail=root.Value("contactEmail").ToString();
+    }
+    if (!Model.HasValue("hideSlider") || Model.Value("hideSlider").ToString()=="True" || Model.IsDocumentType("newspage")){
+        classBody="no-slider";
+    }
+}
+
+
+<!doctype html>
+<html lang="@currentCulture.Substring(0,2).ToLower()">
+<head>
+  @*  @Html.Partial("og-metas-schema")*@
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>@Model.Value("metaTitle", fallback: Fallback.To(Fallback.Ancestors, Fallback.Language))</title>
+    <meta name="description" content="@Model.Value("metaDescription", fallback: Fallback.To(Fallback.Ancestors, Fallback.Language))">
+    @*<meta name="keywords" content="@Model.Value("metaKeywords", fallback: Fallback.To(Fallback.Ancestors, Fallback.Language))">*@
+
+	@if(Model.IsDocumentType("offer") && Model.HasValue("unavailableAfter")){
+	    <meta name="robots" content="unavailable_after: @(Model.Value<DateTime>("unavailableAfter").ToString("yyyy/MM/dd"))">
+	}
+	
+
+    @Html.Partial("hreflangsettings")
+
+
+    <link rel="icon" type="image/ico" href="/favicon.ico">
+    <!--PREFETCH STARTS HERE-->
+    <link rel="dns-prefetch" crossorigin="anonymous" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <!--PREFETCH ENDS HERE -->
+
+
+    <!-- FONTS STARTS HERE  -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" crossorigin href="https://fonts.gstatic.com">
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="@Html.Raw("https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap")" />
+    <noscript><link rel="stylesheet" type="text/css" href="@Html.Raw("https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap")" /></noscript>
+    <!-- FONTS ENDS HERE  -->
+
+
+   <!-- BOOTSTRAP CSS  -->
+    <link rel="preload" as="style" href="@Html.Raw("https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css")" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="@Html.Raw("https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css")" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+   <!-- BOOTSTRAP CSS  -->
+
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- MY STYLE -->
+    <link rel="preload" as="style" href="/css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- MY STYLE -->
+
+    @if (Model.HasValue("youTubeVideoUrl")){@* && Model.Value<string>("videoUrl").ToLower().Contains("youtu")) {*@
+        <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    }
+
+    @Html.Raw(Model.Value("scriptsHeader", fallback: Fallback.ToAncestors))
+
+</head>
+<body class="@classBody @(Model.Level>1 ? "innerpages" : "homepage") @currentCulture.Substring(0,2).ToLower()"> 
+
+    @Html.Raw(Model.Value("scriptsAfterBody", fallback: Fallback.ToAncestors))
+    
+    
+        <header id="header_nav" class="fixed-top">
+        @*
+        <div class="d-flex g-0 justify-content-between align-items-center ribbon px-3 px-md-4 px-xl-5">
+            <div class="tel-icon">
+                @if (contactTelNo!=""){
+                    <a href="tel:@contactTelNo.ToString().Replace("+","00").Replace(" ","")">
+                    <img src="/images/tel.svg" class="img-fluid" alt="Call us" /><span>@contactTelNo</span></a>
+                }
+            </div>
+            <div class="text-end d-flex">
+                @Html.Partial("languages")
+                <div class="ribbon-sm-nav">
+                    @Html.Raw(@Umbraco.GetDictionaryValue("nav-links-ribbon"))
+                </div>
+            </div>
+        </div>*@
+        
+        <div class="row g-0 align-items-center  main-header">
+            <div class="col-4 col-lg-5 left-col d-flex align-items-center">
+                @Html.Partial("languages")
+            </div>
+
+            <div class="col-4 col-lg-2 text-center">
+                <div class="logo">
+                    @if (siteLogoImg != ""){
+                        <a href="@root.Url()" title="@root.Value("Sitename")">
+                            <img src="@siteLogoImg" class="img-fluid" alt="@root.Value("Sitename")" />
+                        </a>
+                    }
+                </div>
+            </div>
+            <div class="col-4 col-lg-5 d-flex align-items-center justify-content-end right-col">
+                <div class="navContactInfo">
+                    @if (contactEmail!=""){
+                        <div class="email-icon">
+                            <a href="mailto:@contactEmail.ToString()" title="@contactEmail">
+                            <img src="/images/email.svg" class="img-fluid" alt="Email us" /><span>@contactEmail</span></a>
+                        </div>
+                    }
+                    @if (contactTelNo!=""){
+                        <div class="tel-icon">
+                            <a href="tel:@contactTelNo.ToString().Replace("+","00").Replace(" ","")" title="@contactTelNo">
+                            <img src="/images/tel.svg" class="img-fluid" alt="Call us" /><span>@contactTelNo</span></a>
+                        </div>
+                    }
+                </div>
+            
+                @if (root.HasValue("headerMenu")){
+                    <div class="headerMenuLinks">
+                        @Html.Raw(root.Value("headerMenu"))
+                    </div>
+                }
+                @if (bookingUrl!=""){
+                    <a href="@bookingUrl" target="_blank" title="@Umbraco.GetDictionaryValue("bookNow")" class="btn btn--book">@Umbraco.GetDictionaryValue("bookNow")</a>
+                }
+            </div>
+        </div>
+    </header>
+    
+    <div class="main_navigation-holder">
+            <div class="nav-but-wrap menu-trigger" id="main-navigation-trigger" >
+                <div class="menu-icon hover-target">
+                    <span class="menu-icon__line"></span>
+                    <span class="menu-icon__line"></span>
+                    <span class="menu-icon__line"></span>
+                </div>	
+                <div class="nav-btn-text">menu</div>
+            </div>
+            
+        <div class="main_navigation" id="main-navigation">
+
+                    
+            <div class="overlay"></div> 
+            <div class="wrapper px-4 px-xl-5"> 
+                <nav class="main-menu">
+    		    @Html.Partial("~/views/partials/navigation/main-navigation.cshtml")
+    		        <div class="main-menu-btns">
+    		            @Html.Raw(Umbraco.GetDictionaryValue("OnlineCheckInBtn"))
+    		        </div>
+               </nav>
+               <div class="burger-img-bg">
+                    <div class="menu-contact">
+                       @Html.Raw(root.Value("contactDetails"))
+                        <div class="social">
+                            @Html.Raw(root.Value("socialMedia"))
+                        </div>
+                    </div>
+                    
+                   @if (root.HasValue("imageForNavigation")){
+                    var img = root.Value<IPublishedContent>("imageForNavigation");
+                    if (img!=null){
+                        <picture>                        
+                            <source srcset="@img.Url()?width=680&quality=70&format=webp" media="(min-width: 0px)" type="image/webp">
+                            <source srcset="@img.Url()?width=680&quality=70" media="(min-width: 0px)" type="image/jpeg">
+                            <img src="@img.Url()?width=680&quality=70" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", img)" class="img-fluid img-fit">
+                        </picture>
+                    }
+                }
+            
+               </div>
+            </div>    
+        </div>  
+	</div>
+	
+
+    @* --- HERO SLIDER --- *@
+    @if (Model.HasValue("hideSlider") && Model.Value("hideSlider").ToString()!="True" && !Model.IsDocumentType("newspage")){
+        <div class="position-relative @(Model.HasValue("videoUrl") ? "mainVideoSlider" : null) @(Model.HasValue("youTubeVideoUrl") ? "YTvideo-placement" : null) @(Model.IsDocumentType("accommodation") ? "topMediaInner" : null )">
+            @if (Model.HasValue("videoUrl")) {
+                var videoExt=Model.Value("videoUrl").ToString().Substring(Model.Value("videoUrl").ToString().LastIndexOf('.') + 1);
+                <video autoplay muted loop > @*controls*@
+                  <source src="@Model.Value("videoUrl")" type="video/@videoExt">
+                  @if (Model.HasValue("fallbackVideoUrl")){
+                    var videoExtAlt=Model.Value("fallbackVideoUrl").ToString().Substring(Model.Value("videoUrl").ToString().LastIndexOf('.') + 1);
+                    <source src="@Model.Value("fallbackVideoUrl")" type="video/@videoExtAlt">
+                  }
+                </video>
+            }else if (Model.HasValue("youTubeVideoUrl")){
+                    <div id="player" data-plyr-provider="youtube" data-plyr-embed-id="@Model.Value("youTubeVideoUrl")" style="--plyr-color-main: #333333;"></div>
+            }else{
+                @Html.Partial("sliders")
+            }
+            
+        </div>
+    }else {
+        <div class="noSlider-holder"></div>
+    }
+    
+    @Html.Partial("bookingForm")
+
+    @*
+    @if (Model.Level>1){
+    	@Html.Partial("~/views/partials/navigation/breadcrumb.cshtml")
+    }
+    *@
+    
+    @RenderBody()
+    
+      
+    <footer class="px-container-space bg-color">
+        <div class="">
+            @* ===== NEWSLETTER =======  *@
+            @if(!Model.IsDocumentType("form")){
+                <div class="container mt-offset">
+                    <div class="row g-0">
+                        <div class="@(Model.IsDocumentType("form") ? "col-12" : "col-md-5") map"> 
+                            @Html.Raw(@Umbraco.GetDictionaryValue("Map"))
+                        </div>
+                        <div class="col-md-7 newsletter">                    
+                            <div class="">
+                                <div class="heading">
+                                     @Html.Raw(@Umbraco.GetDictionaryValue("header-newsletter"))
+                                </div>
+                                @{
+                                    Html.RenderPartial("~/Views/Partials/formNewsletter.cshtml", new formNewsletterViewModel());
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            @* ===== NEWSLETTER =======  *@
+            
+                
+            <div class="mt-offset">
+                <div class="footerDivider">
+                    <hr><img src="/images/logo-icon.svg" class="img-fluid" alt="@root.Value("Sitename")"><hr>
+                </div>
+                @Html.Partial("~/views/partials/navigation/footer-navigation.cshtml")
+
+                <div class="contact">
+                    @Html.Raw(root.Value("contactDetails"))
+                </div>
+                <div class="social">
+                    @Html.Raw(root.Value("socialMedia"))
+                </div>
+            </div>    
+                
+            <div class="copyright text-center">
+                @Html.Raw(@Umbraco.GetDictionaryValue("footer-copyright"))
+            </div>    
+                
+                
+        </div>
+    </footer>
+    
+    
+
+    
+            
+        <!-- SCROLL TO TOP  -->
+        <div id="progress">
+            <div id="progress-value">
+                <img src="/images/arrow-up-top.svg" alt="scroll to top">
+            </div>
+        </div>
+        <!-- SCROLL TO TOP  -->   
+        
+
+
+    @Html.Raw(@Umbraco.GetDictionaryValue("ESPA-banner"))
+    @if (Model.IsDocumentType("homepage")){
+        @Html.Partial("popup")
+    }
+
+
+    <!--START BOOTSTRAP JS  -->
+    <script src="@Html.Raw("https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js")" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+   <!--END BOOTSTRAP JS  -->
+
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/fslightbox/3.3.1/index.min.js" integrity="sha512-EqNNJuepkw5P9vxCml8eBk7C4Ld+4kAnvzOD/jG21rkxWPILGoQa5EvD62UieiJF0u3xoQrcVnce4i83VnYj/Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    @if (Model.HasValue("youTubeVideoUrl") && Model.Value<string>("youTubeVideoUrl").ToLower().Contains("youtu")) {
+                <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+                <script>
+                 const player = new Plyr('#player', {
+                    muted: true,
+                    clickToPlay:false,
+                     autoplay: true,
+                    loop:{ active: true }
+                });
+
+            </script>
+    }
+
+    @RenderSection("Scripts", false)
+
+    <script src="/scripts/scripts.js"></script>
+    <script src="/scripts/validation.js"></script>
+
+  @*
+    <script defer src="/scripts/cookieconsent-v2.8.6.js"></script>
+    <script defer src="/scripts/cookieconsent-init.js"></script>*@
+    
+    @*Schema.org *@
+    @if (Model.HasValue("schemaJson")){
+        @Html.Raw(Model.Value("schemaJson"))
+    }
+    
+    
+    @Html.Raw(Model.Value("scriptsBeforeClosingBody", fallback: Fallback.ToAncestors))
+
+</body>
+</html>
+

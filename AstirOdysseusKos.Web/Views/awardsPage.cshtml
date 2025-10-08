@@ -1,0 +1,40 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using Umbraco.Cms.Core.Models.Blocks;
+@{
+	Layout = "MainTemplate.cshtml";
+}
+
+<div class="page-bodytext-section py-offset"> 
+    <div class="container"> @*content-max-width text-content*@
+        <h1>
+            @Html.Raw(Model.Value("headerH1"))
+        </h1>
+        @Model.Value("bodyText")
+        @if (Model.Value<IEnumerable<BlockListItem>>("awards").Count()>0){
+            var awardsBlocks = Model.Value<IEnumerable<BlockListItem>>("awards").Reverse();
+            var counterAwards=1;
+          
+            if (awardsBlocks.Count()>1){
+                <div class="awards-page mt-5">
+                    <div class="mt-2 d-flex justify-content-center flex-wrap">
+                        @foreach (var block in awardsBlocks){
+                            var content = block.Content;
+                            <div class="p-3">
+                                @Html.Partial("~/Views/Partials/blockList/Components/" + content.ContentType.Alias+".cshtml", block)
+                            </div>
+                        }
+                    </div>
+                </div>    
+            }
+        }
+            
+    </div>
+</div>
+
+@Html.GetBlockListHtml(Model, "bodySections")
+
+@if (Model.Level>=3){
+    @Html.Partial("other-pagesBoxes")
+    
+}

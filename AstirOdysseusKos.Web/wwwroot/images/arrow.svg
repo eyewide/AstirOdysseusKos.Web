@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="73.614" height="60" viewBox="0 0 73.614 60">
+  <g id="Left" transform="translate(0 60) rotate(-90)">
+    <g id="Ellipse_6" data-name="Ellipse 6" transform="translate(60 73.614) rotate(180)" fill="none" stroke="#3a4c72" stroke-width="1">
+      <ellipse cx="30" cy="30" rx="30" ry="30" stroke="none"/>
+      <ellipse cx="30" cy="30" rx="29.5" ry="29.5" fill="none"/>
+    </g>
+    <line id="Line_44" data-name="Line 44" y2="37.872" transform="translate(29.724 0)" fill="none" stroke="#3a4c72" stroke-width="1"/>
+    <line id="Line_46" data-name="Line 46" y1="11.904" transform="translate(21.547 29.455) rotate(-45)" fill="none" stroke="#3a4c72" stroke-width="1"/>
+    <line id="Line_47" data-name="Line 47" y1="11.904" transform="translate(37.901 29.455) rotate(45)" fill="none" stroke="#3a4c72" stroke-width="1"/>
+  </g>
+</svg>

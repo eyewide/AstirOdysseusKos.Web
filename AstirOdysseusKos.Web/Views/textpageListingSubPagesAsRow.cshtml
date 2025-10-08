@@ -1,0 +1,26 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+	Layout = "MainTemplate.cshtml";
+}
+
+<div class="page-bodytext-section py-offset bg-white"> 
+    <div class="container"> @*content-max-width text-content*@
+        <h1>
+            @Html.Raw(Model.Value("headerH1"))
+        </h1>
+        @Model.Value("bodyText")
+    </div>
+</div>  
+
+@Html.GetBlockListHtml(Model, "bodySections")
+
+@if (Model.Level>=2){
+    @Html.Partial("listing-subpagesAsRows")
+}   
+   
+   @*
+@if (Model.Level>=3){
+    @Html.Partial("other-pagesBoxes")
+    
+}*@

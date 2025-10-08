@@ -1,0 +1,85 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using Umbraco.Cms.Core.Models.Blocks;
+@{
+	Layout = "MainTemplate.cshtml";
+	
+	IEnumerable<IPublishedContent> rooms=null;
+    if (Model.DescendantsOfType("accommodationType").Where(x => x.IsVisible()).Count()>0){
+        rooms = Model.DescendantsOfType("accommodationType").Where(x => x.IsVisible());
+    }
+    var i=1;
+}
+
+<div class="page-bodytext-section py-offset bg-white"> 
+    <div class="container"> @*content-max-width text-content*@
+        <h1>
+            @Html.Raw(Model.Value("headerH1"))
+        </h1>
+        @Model.Value("bodyText")
+    </div>
+</div>
+
+<div class="all-rooms container-fluid bg-white">
+    @if (rooms!=null){
+        foreach (var x in rooms){ 
+
+            <div class="room-row row">
+                <div class="place-img g-0 col-12 col-lg-6 @(i%2==0 ? "order-lg-2" : null)">
+                    @if (x.HasValue("imageForListing")){
+                        var img = x.Value<IPublishedContent>("imageForListing");
+                        if (img!=null){
+                            <a href="@x.Url()" title="@Html.Raw(x.Value("menuTitle"))">
+                            <picture>
+                                <source srcset="@img.GetCropUrl("horizontal-lg")&quality=70&format=webp" media="(min-width: 1200px)" type="image/webp">
+                                <source srcset="@img.GetCropUrl("horizontal-lg")&quality=70" media="(min-width: 1200px)" type="image/jpeg">
+                                <source srcset="@img.GetCropUrl("square-md")&quality=70&format=webp" media="(min-width: 992px)" type="image/webp">
+                                <source srcset="@img.GetCropUrl("square-md")&quality=70" media="(min-width: 992px)" type="image/jpeg">
+                                <source srcset="@img.GetCropUrl("horizontal-lg")&quality=70&format=webp" media="(min-width: 768px)" type="image/webp">
+                                <source srcset="@img.GetCropUrl("horizontal-lg")&quality=70" media="(min-width: 768px)" type="image/jpeg">
+                                <source srcset="@img.GetCropUrl("horizontal-md")&quality=70&format=webp" media="(min-width: 576px)" type="image/webp">
+                                <source srcset="@img.GetCropUrl("horizontal-md")&quality=70" media="(min-width: 576px)" type="image/jpeg">
+                                <source srcset="@img.GetCropUrl("square-sm")&quality=70&format=webp" media="(min-width: 0px)" type="image/webp">
+                                <source srcset="@img.GetCropUrl("square-sm")&quality=70" media="(min-width: 0px)" type="image/jpeg">
+                                <img src="@img.GetCropUrl("square-sm")&quality=70" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", img)" class="img-fluid ">
+                            </picture></a>
+                        }
+                    }
+                </div>
+                    
+                <div class="text-holder col-12 col-lg-6 @(i%2==0 ? "order-lg-1" : null)">
+                    <h2 class="title"><a href="@x.Url()" title="@Html.Raw(x.Value("menuTitle"))">@x.Value("menuTitle")</a></h2>  
+                    <div class="text-space">
+                        @Html.Raw(x.Value("shortDescription"))
+                           
+                        @*ROOM DETAILS *@      
+                        @{
+                          var blocks = x.Value<IEnumerable<BlockListItem>>("roomDetails");
+                          var counter=1;
+                          if (blocks.Count()>0){
+                            <div class="d-flex align-items-center room-details">
+                              @foreach (var block in blocks){
+                                var content = block.Content;
+                                <div class="detail">
+                                    @Html.Partial("~/Views/Partials/blockList/Components/" + content.ContentType.Alias+".cshtml", block)
+                                </div>
+                                counter++;
+                              }
+                            </div>
+                          }
+                        }
+                                
+                        <div class="mt-4 text-start">
+                            <a class="btn btn--more" href="@x.Url()">@Umbraco.GetDictionaryValue("explore")</a>
+                            @*<a href="@x.Value("bookingLink", fallback: Fallback.ToAncestors)" target="_blank" class="btn btn--book" title="@Html.Raw(Umbraco.GetDictionaryValue("bookNow"))">
+                                @Html.Raw(Umbraco.GetDictionaryValue("bookNow"))
+                            </a>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        i++;
+        }
+    }
+</div>
+

@@ -1,0 +1,111 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using Umbraco.Cms.Core
+@using Umbraco.Cms.Core.Models.PublishedContent
+@using Umbraco.Cms.Core.Routing
+@using Umbraco.Extensions
+
+@inject IPublishedValueFallback PublishedValueFallback
+@inject IPublishedUrlProvider PublishedUrlProvider
+
+@{
+    var site = Model.Root();
+    var selection = site.Children.Where(x => x.IsVisible() && x.Value<bool>("hideMainMenu")!= true && x.Value<bool>("hideInNavigation")!= true);
+
+    var i=1;
+
+@*
+@Model.TemplateId==1151 // template display all subpages in one: experiences
+@Model.TemplateId==1153 // template display all subpages in one: news
+*@
+
+
+
+  <ul class="menu level-1 ">
+    <li>
+        <a href="@site.Url()" class="hover-target @(site.Id == Model.Id ? "active" : null)">
+            @site.Value("menuTitle", fallback: Fallback.ToLanguage)
+        </a>
+    </li>
+            
+
+    @foreach (var item in selection)
+    {
+        if (item.Children.Where(x => x.IsVisible() && !x.IsDocumentType("newspage") && x.Value<bool>("hideInNavigation")!= true).Count() > 0){  
+            <li class="parent @(item.IsAncestorOrSelf(Model) ? "expanded" : null)">
+                <a href="@item.Url()" class="hover-target @(item.IsAncestorOrSelf(Model) ? "active" : null)">
+                    @item.Value("menuTitle", fallback: Fallback.ToLanguage)
+                </a>
+                <span class="arrow"></span>
+      
+                 @{ Traverse(item); }
+             
+            </li>        
+        }else{
+            <li>
+                <a href="@item.Url()" class="hover-target @(item.IsAncestorOrSelf(Model) ? "active" : null)">
+                    @item.Value("menuTitle", fallback: Fallback.ToLanguage)
+                </a>
+            </li>
+        
+        }
+
+        i++;
+    }
+
+
+	</ul>
+                    
+}
+
+
+
+@* Helper method to traverse through all descendants *@
+@{
+    void Traverse(IPublishedContent? item)
+    {
+    
+        @* Select visible children *@
+        var selection = item?.Children.Where(x => x.IsVisible() && x.Value<bool>("hideInNavigation")!= true).ToArray();
+
+        @* If any items are returned, render a list *@
+        if (selection?.Length > 0)
+        {
+            <ul class="menu level-2 submenu @(item.IsAncestorOrSelf(Model) ? "is-visible" : null)">
+                @foreach (var x in selection)
+                {
+                    <li>
+                        <a href="@x.Url()" class="menu__link @(x.IsAncestorOrSelf(Model) ? "active" : null)">@x.Value("menuTitle", fallback: Fallback.ToLanguage)</a>
+
+                        @* Run the traverse method again for any child pages *@
+                       @* @{ Traverse(item); }*@
+                    </li>
+                }
+            </ul>
+        }
+    }
+}
+
+
+@{
+    void TraverseReplaceMenuTitle(string title) {
+
+    	var charectersGrForReplace = new Dictionary<string,string>();
+    	string menuTitleAfterReplace=title;
+    					
+    	charectersGrForReplace.Add("ά", "α");
+    	charectersGrForReplace.Add("έ", "ε");
+    	charectersGrForReplace.Add("ή", "η");
+    	charectersGrForReplace.Add("ί", "ι");
+    	charectersGrForReplace.Add("ό", "ο");
+    	charectersGrForReplace.Add("ύ", "υ");
+    	charectersGrForReplace.Add("ώ", "ω");
+    
+    					
+    	foreach (var c in charectersGrForReplace.Keys){
+    		menuTitleAfterReplace=menuTitleAfterReplace.Replace(c, charectersGrForReplace[c]);
+    	}	
+    	
+    	@menuTitleAfterReplace
+	}
+	
+}

@@ -1,0 +1,27 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+
+@{
+    var currentCulture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;	
+    var root=Model.AncestorOrSelf(1);
+    var allCultures=root.Cultures;
+    var enCulture="en-US";
+    @*var domain="";*@
+    var domain=root.Url(culture: enCulture, mode:UrlMode.Absolute).TrimEnd('/');
+    
+    foreach (var (culture, infos) in allCultures){
+        if (culture!=currentCulture.ToString().ToLower()){
+        <link rel="alternate" href="@domain@(Model.Url(culture)!="#" ? Model.Url(culture): root.Url(culture))" hreflang="@culture.Substring(0,2).ToLower()">
+       }
+    }
+
+    if (currentCulture.Substring(0,2).ToLower()=="en"){
+        <link rel="alternate" href="@Html.Raw(domain + Model.Url(currentCulture))" hreflang="@currentCulture.Substring(0,2).ToLower()">
+        <link rel="alternate" href="@Html.Raw(domain + Model.Url(currentCulture))" hreflang="x-default">
+    }else{
+   
+        <link rel="alternate" href="@Html.Raw(domain + Model.Url(currentCulture))" hreflang="@currentCulture.Substring(0,2).ToLower()">
+        <link rel="alternate" href="@Html.Raw(domain + Model.Url(enCulture))" hreflang="x-default">
+    }
+    <link rel="canonical" href="@Html.Raw(domain + Model.Url(currentCulture))">    
+    
+}

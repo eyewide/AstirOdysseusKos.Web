@@ -1,0 +1,54 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using Umbraco.Cms.Core.Routing
+@using Umbraco.Extensions
+
+@inject IPublishedUrlProvider PublishedUrlProvider
+
+
+@{ var selection = Model?.Ancestors().ToArray(); }
+
+@if (selection?.Length > 0)
+{
+    <div class="breadcrumb  bg-section">
+        <div class="holder px-2 px-sm-3 px-xl-5 text-start">
+            <ul class="list-unstyled d-inline-flex flex-wrap justify-content-center">
+                @foreach (var item in selection.OrderBy(x => x.Level))
+                {
+                    <li><a href="@item.Url()">
+                        @Html.Raw(item.Value("menuTitle"))
+                    @* @{ Traverse(item.Value("menuTitle").ToString().ToLower()); }*@
+                     </a></li>
+                }
+                <li class="active">
+                     @Html.Raw(Model.Value("menuTitle"))
+                    @*@{ Traverse(Model.Value("menuTitle").ToString().ToLower()); }*@
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+
+
+@{
+    void Traverse(string title)
+    {
+    	var charectersGrForReplace = new Dictionary<string,string>();
+    	string menuTitleAfterReplace=title;
+    					
+    	charectersGrForReplace.Add("ά", "α");
+    	charectersGrForReplace.Add("έ", "ε");
+    	charectersGrForReplace.Add("ή", "η");
+    	charectersGrForReplace.Add("ί", "ι");
+    	charectersGrForReplace.Add("ό", "ο");
+    	charectersGrForReplace.Add("ύ", "υ");
+    	charectersGrForReplace.Add("ώ", "ω");
+    
+    					
+    	foreach (var c in charectersGrForReplace.Keys){
+    		menuTitleAfterReplace=menuTitleAfterReplace.Replace(c, charectersGrForReplace[c]);
+    	}	
+    	
+    	@menuTitleAfterReplace
+	
+    }
+}

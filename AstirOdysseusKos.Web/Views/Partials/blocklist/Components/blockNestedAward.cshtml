@@ -1,0 +1,52 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Umbraco.Cms.Core.Models.Blocks.BlockListItem>;
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+
+@{
+  var content = (ContentModels.BlockNestedAward)Model.Content;
+  var settings = (ContentModels.GenericBlockSettings)Model.Settings;
+}
+
+@if (settings.Value("disableSection").ToString()!="True"){
+    var title=content.Value("title").ToString();
+    var widget=content.Value("widget");
+    var popup= content.Value("popupImage").ToString();
+    var link= content.Value("link").ToString();
+    
+      
+    <div class=""> 
+        @if (widget!=""){
+            @Html.Raw(widget)
+        }else if (content.Value<IPublishedContent>("image")!=null){
+            var icon=content.Value<IPublishedContent>("image");
+            if (popup=="True"){
+                <a href="@icon.Url()" data-fslightbox="gallery">
+                     @{ Traverse(icon, title); }
+                </a>
+            }else if (link!=""){
+                <a href="@link" target="_blank" title="@title">
+                    @{ Traverse(icon, title); }
+                </a>
+            }else{
+                Traverse(icon, title); 
+            }
+        }
+                       
+    </div>      
+}
+
+
+
+@{
+    void Traverse(IPublishedContent? icon, string title)
+    {
+        if (icon.Value("umbracoExtension").ToString()=="svg"){
+            <img src="@icon.Url()" alt="@title" class="img-fluid award-svg">
+        }else{
+            <picture>
+                <source srcset="@icon.Url()?height=120&format=webp" type="image/webp">
+                <source srcset="@icon.Url()?height=120" type="image/jpeg">
+                <img src="@icon.Url()?height=120" alt="@title" class="img-fluid ">
+            </picture>
+        }
+    }
+}

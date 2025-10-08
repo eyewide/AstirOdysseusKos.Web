@@ -1,0 +1,35 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+	Layout = "MainTemplate.cshtml";
+	var root = Model.Root();
+	var bookingUrl="";
+    if (Model.HasValue("offerBookingLink")){
+        bookingUrl = Model.Value("offerBookingLink").ToString();
+    }@*else if (root.HasValue("bookingLink")){
+        bookingUrl=root.Value("bookingLink").ToString();
+    }  *@ 
+}
+
+<div class="page-bodytext-section py-offset"> 
+    <div class="container"> @*content-max-width text-content*@
+        <h1>
+            @Html.Raw(Model.Value("headerH1"))
+        </h1>
+        @Model.Value("bodyText")
+        
+        @if (bookingUrl!=""){
+            <a href="@bookingUrl" target="_blank" class="btn btn--book" title="@Html.Raw(Umbraco.GetDictionaryValue("bookNow"))">
+               @Html.Raw(Umbraco.GetDictionaryValue("bookNow"))
+            </a>
+        } 
+            
+    </div>
+</div>
+
+@Html.GetBlockListHtml(Model, "bodySections")
+    
+    
+@if (Model.Level>=3){
+    @Html.Partial("other-pagesBoxes")
+}

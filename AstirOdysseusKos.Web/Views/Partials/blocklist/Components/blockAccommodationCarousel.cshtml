@@ -1,0 +1,87 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Umbraco.Cms.Core.Models.Blocks.BlockListItem>;
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+@using Umbraco.Cms.Core.Models;
+@using Umbraco.Cms.Core.Models.Blocks;
+
+@{
+    var content = (ContentModels.BlockAccommodationCarousel)Model.Content;
+    var settings = (ContentModels.GenericBlockSettings)Model.Settings;
+    IPublishedContent nodePicker = content.Value<IPublishedContent>("nodeSelection");
+    var i=1;
+}
+
+@if (settings.Value("disableSection").ToString()!="True"){
+
+<div class="py-offset section-stay-carousel bg-white">
+    <div class="container text-holder">
+        @if (content.Value("title").ToString()!=""){
+            <h2>@Html.Raw(content.Value("title"))</h2> 
+        }
+        @if (content.Value("text").ToString()!=""){
+            <div>@Html.Raw(content.Value("text"))</div> 
+        }
+    </div>
+    
+    @if (nodePicker != null && nodePicker.Children.Where(x => x.IsVisible()).Count()>0){
+        var subpages = nodePicker.Children.Where(x => x.IsVisible());
+
+	    <div class="position-relative">
+	    <div class="swiper roomsSwiper slider-arrows-bottom">
+
+            <div class="swiper-wrapper">
+      
+			    @foreach (var node in subpages) {
+			     <div class="swiper-slide position-relative">
+                    <div class="img-holder">
+                     @if (node.HasValue("imageForListing")){
+        			        var img = node.Value<IPublishedContent>("imageForListing");
+                            <picture>
+                                 <source srcset="@img.GetCropUrl("square-md")&quality=70&format=webp" media="(min-width: 576px)" type="image/webp">
+                                <source srcset="@img.GetCropUrl("square-md")&quality=70" media="(min-width: 576px)" type="image/jpeg">
+                                <source srcset="@img.GetCropUrl("square-sm")&quality=70&format=webp" media="(min-width: 0px)" type="image/webp">
+                                <source srcset="@img.GetCropUrl("square-sm")&quality=70" media="(min-width: 0px)" type="image/jpeg">
+                                <img src="@img.GetCropUrl("square-sm")&quality=70" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", img)" class="img-fluid">
+                            </picture>
+                        }
+                    </div>
+                    <div class="box-text">
+                        <h3 class="title">@Html.Raw(node.Value("menuTitle"))</h3>  
+                        <div class="text-space">
+                            @if (node.Value("shortDescription").ToString()!=""){
+                                @Html.Raw(node.Value("shortDescription"))
+                            }
+                                 @*ROOM DETAILS       *@      
+                            @if (node.Value<IEnumerable<BlockListItem>>("roomDetails").Count()>0){
+                                var blocks = node.Value<IEnumerable<BlockListItem>>("roomDetails");
+                                <div class="d-flex room-details">
+                                  @foreach (var x in blocks){
+                                    var detail = x.Content;
+                                    <div class="detail">
+                                        @Html.Partial("~/Views/Partials/blockList/Components/" + detail.ContentType.Alias+".cshtml", x)
+                                    </div>
+                                  }
+                                </div>
+                            }
+                                
+                            <div class="mt-3">
+                                <a class="btn btn--more" href="@node.Url()">@Umbraco.GetDictionaryValue("explore")</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                    i++;
+                }
+			</div>	
+			
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+            
+        </div>
+    	</div>
+	
+	 }
+	
+</div>
+
+
+}

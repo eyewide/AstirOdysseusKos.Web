@@ -1,0 +1,46 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Umbraco.Cms.Core.Models.Blocks.BlockListItem>;
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+
+
+@{
+    var content = (ContentModels.BlockNestedReview)Model.Content;
+    var settings = (ContentModels.GenericBlockSettings)Model.Settings;
+}
+
+@if (settings.Value("disableSection").ToString()!="True"){
+    <div class="review-item">
+        @if (content.Value("reviewTitle").ToString()!=""){
+             <div class="rTitle">
+                 @if (content.Value("reviewFrom").ToString()!=""){
+                    var fromSite=content.Value("reviewFrom").ToString().ToLower();
+                    if (fromSite.Contains("trip")){
+                        <span class="review-icon tripadvisor"></span>
+                    }
+                    if (fromSite.Contains("booking")){
+                        <span class="review-icon bookingcom"></span>
+                    }
+                    if (fromSite.Contains("facebook")){
+                        <span class="review-icon fb"></span>  
+                    }
+                    if (fromSite.Contains("holidaycheck")){
+                        <span class="review-icon hc"></span>
+                    }
+                }
+                <span class="review-title">@Html.Raw(content.Value("reviewTitle"))</span></div>
+        }
+        @if (content.Value("reviewText").ToString()!=""){
+            <div class="rText">
+                @Html.Raw(content.Value("reviewText"))
+            </div>
+        }
+        @if (content.Value("reviewName").ToString()!=""){
+            <div class="rName mt-3">@Html.Raw(content.Value("reviewName"))</div>
+        }
+        @*
+         *@
+    </div>
+        
+}
+
+
+

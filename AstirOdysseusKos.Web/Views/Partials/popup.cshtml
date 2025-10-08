@@ -1,0 +1,86 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+@*var root = Model.Root();*@
+var root = Model;
+var title=root.Value("Sitename");
+
+
+if (root.Value("enablePopup").ToString()=="True"){
+
+  var titleSetAsDefaultEn=root.Value("popupTitle", "en-US");
+  var titleCurrent=root.Value("popupTitle");
+  var textSetAsDefaultEn=root.Value("popupText", "en-US");
+  var textCurrent=root.Value("popupText");
+  var bookingLinkCurrentDefaultEn=root.Value("popupBookingLink", "en-US");
+  var bookingLinkCurrent=root.Value("popupBookingLink");
+  
+  
+   <div class="modal fade" id="popupModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content padding">
+                @*<div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true">X</button>
+                </div>*@
+                <div class="modal-body">
+                    @*<button type="button" class="btn-close" data-dismiss="modal" aria-hidden="true"></button>*@
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        
+                    <div class="d-md-flex align-items-center justify-content-strectch no-gutters">
+                        @if (root.HasValue("popupImage"))
+                        {       			
+                            var img = root.Value<IPublishedContent>("popupImage");
+                            var imgUrl=img.GetCropUrl("square");
+                            <div class="img @(textCurrent.ToString()!="" && textCurrent.ToString()!=null ? "col-md-6" : null)">
+                            
+                                @if (!(textCurrent.ToString()!="" && textCurrent.ToString()!=null) && bookingLinkCurrent!=""){
+                                    @Html.Raw("<a href=\""+@bookingLinkCurrent+"\" target=\"_blank\">")
+                                }
+                                <picture>
+                                    @if (textCurrent.ToString()!="" && textCurrent.ToString()!=null ){
+                                        <source srcset="@img.GetCropUrl("vertical-md")&quality=75&format=webp" type="image/webp" media="(min-width: 768px)"> @*square-lg *@
+                                        <source srcset="@img.GetCropUrl("vertical-md")&quality=75" type="image/jpeg" media="(min-width: 768px)">
+                                    }else{
+                                        <source srcset="@img.Url()?width=800&quality=75&format=webp" type="image/webp" media="(min-width: 768px)">
+                                        <source srcset="@img.Url()?width=800&quality=75" type="image/jpeg" media="(min-width: 768px)">
+                                    }
+                                    <source srcset="@img.GetCropUrl("horizontal-xs")&quality=75&format=webp" type="image/webp" media="(min-width: 0px)">
+                                    <source srcset="@img.GetCropUrl("horizontal-xs")&quality=75" type="image/jpeg" media="(min-width: 0px)">
+                                    <img src="@img.GetCropUrl("horizontal-xs")&quality=75" alt="@title" class="img-fluid">
+                                </picture>  
+                                @if (!(textCurrent.ToString()!="" && textCurrent.ToString()!=null) && bookingLinkCurrent!=""){
+                                    @Html.Raw("</a>")
+                                }
+            
+                            </div>
+                        }
+                        @if (textCurrent.ToString()!="" && textCurrent.ToString()!=null ){
+                            <div class="@(root.HasValue("popupImage") ? "col-md-6": null) text">
+                		        <div style="margin:30px;">
+                        			  @if (titleCurrent!=""){
+                                        <h2 class="h3">@titleCurrent</h2>
+                                      }else{
+                                        <h2 class="h3">@titleSetAsDefaultEn</h2>
+                                      }
+                                      @if (textCurrent.ToString()!="" && textCurrent.ToString()!=null ){
+                                        @Html.Raw(textCurrent)
+                                      }else{
+                                        @Html.Raw(textSetAsDefaultEn)
+                                      } 
+                                      @if (bookingLinkCurrent!=""){
+                                        <div class=""><a href="@bookingLinkCurrent" target="_blank" class="btn btn--book">@Umbraco.GetDictionaryValue("bookNow")</a></div>
+                                      }@*else{
+                                        <div class=""><a href="@bookingLinkCurrentDefaultEn" target="_blank" class="BookInner">@Umbraco.GetDictionaryValue("readMore")</a></div>
+                                      }*@
+                	    	    </div>
+                    		</div>    
+                		}
+                    </div>
+           
+                </div>
+            
+            </div>
+        </div>
+    </div>  
+      
+}
+}

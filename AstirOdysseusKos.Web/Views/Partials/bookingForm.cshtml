@@ -1,0 +1,66 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using Umbraco.Cms.Core.Models
+@{
+    var root = Model.Root();
+    string bookingLink = "";
+    if (root.HasValue("bookingLink")){
+        bookingLink=root.Value("bookingLink").ToString();
+    }
+    <div class="px-container-space section-booking-form">
+        <div class="bookingForm">
+     
+            <div class="h3">Book with us</div>
+          
+            <div class="bookingForm-holder">
+                <form action="@(bookingLink!="" ? bookingLink : "#")" class="g-3" method="post" name="resLauncher" target="_blank">
+    
+                    <div class="d-flex justify-content-evenly align-items-center items">
+                        <div class="column">
+                            <label for="bookingLinkSel" class="form-label">@Umbraco.GetDictionaryValue("res_Package")</label>
+                            <select class="form-control" name="bookingLinkSel"> 
+                              <option selected value="@bookingLink">@Umbraco.GetDictionaryValue("res_Hotel")</option>
+                              <option value="https://astirodysseuskos.hotelwithflight.com">@Umbraco.GetDictionaryValue("res_HotelFlight")</option>
+                            </select>
+                        </div>
+                    
+                        <div class="column">
+                            <label for="checkin" class="form-label">@Umbraco.GetDictionaryValue("res_Checkin")</label>
+                            <input type="text" name="checkin" id="checkin" class="form-control" autocomplete="off"> 
+                        </div>
+                        <div class="column">
+                            <label for="checkout" class="form-label">@Umbraco.GetDictionaryValue("res_Checkout")</label>
+                            <input type="text" name="checkout" id="checkout" class="form-control" autocomplete="off"> 
+                        </div>
+                        <div class="column">
+                            <label for="Adults" class="form-label">@Umbraco.GetDictionaryValue("res_Adults")</label>
+                            <select class="form-control" name="Adults" id="Adults"> 
+                              <option>1</option>
+                              <option selected="">2</option>
+                              <option>3</option>
+                              <option>4</option>
+                              <option>5</option>
+                            </select>
+                        </div>
+                        <div class="column">
+                          <label for="Children" class="form-label">@Umbraco.GetDictionaryValue("res_Children")</label>
+                          <select class="form-control" name="Children" id="Children"> 
+                              <option selected="">0</option>
+                              <option>1</option>
+                              <option>2</option>
+                              <option>3</option>
+                              <option>4</option>
+                              <option>5</option>
+                          </select>
+                        </div>
+                        <div class="column column-btn text-center ">
+                            <button type="submit" class="btn btn--book" alt="@Umbraco.GetDictionaryValue("bookNow")"> @*white*@
+                            @Html.Raw(Umbraco.GetDictionaryValue("bookNow"))</button>
+                        </div>
+    
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+}

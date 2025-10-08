@@ -1,0 +1,74 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Umbraco.Cms.Core.Models.Blocks.BlockListItem>;
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+
+@{
+    var content = (ContentModels.BlockImagesText)Model.Content;
+    var settings = (ContentModels.GenericBlockSettings)Model.Settings;
+    var blockImages=content.Value<IEnumerable<IPublishedContent>>("images");
+    var i=1;
+}
+
+@if (settings.Value("disableSection").ToString()!="True"){
+
+    <div class="section-text-img bg-white pb-offset">
+        <div class="@(blockImages!=null ? "container-fluid" : "container")">
+        <div class="row align-items-end position-relative">
+            
+        @if (blockImages!=null){
+            <div class="col-12 col-lg-6 place-img position-relative g-0 @(content.Value("revert").ToString()=="True" ? "order-lg-2 revert" : null)" >
+            
+            @if (blockImages.Count()>1){
+                @Html.Raw("<div class=\"sliderContainer\">")
+                @Html.Raw("<div class=\"swiper simpleGallerySwiper\">")
+                @Html.Raw("<div class=\"swiper-wrapper\">")
+            }
+            @foreach (var x in blockImages){
+            <div class="@(blockImages.Count()>1 ? "swiper-slide" : null )">
+                <picture>
+                    <source srcset="@x.GetCropUrl("horizontal-lg")&quality=70&format=webp" media="(min-width: 1200px)" type="image/webp">
+                    <source srcset="@x.GetCropUrl("horizontal-lg")&quality=70" media="(min-width: 1200px)" type="image/jpeg">
+                    <source srcset="@x.GetCropUrl("square-md")&quality=70&format=webp" media="(min-width: 992px)" type="image/webp">
+                    <source srcset="@x.GetCropUrl("square-md")&quality=70" media="(min-width: 992px)" type="image/jpeg">
+                    <source srcset="@x.GetCropUrl("horizontal-lg")&quality=70&format=webp" media="(min-width: 768px)" type="image/webp">
+                    <source srcset="@x.GetCropUrl("horizontal-lg")&quality=70" media="(min-width: 768px)" type="image/jpeg">
+                    <source srcset="@x.GetCropUrl("horizontal-md")&quality=70&format=webp" media="(min-width: 576px)" type="image/webp">
+                    <source srcset="@x.GetCropUrl("horizontal-md")&quality=70" media="(min-width: 576px)" type="image/jpeg">
+                    <source srcset="@x.GetCropUrl("square-sm")&quality=70&format=webp" media="(min-width: 0px)" type="image/webp">
+                    <source srcset="@x.GetCropUrl("square-sm")&quality=70" media="(min-width: 0px)" type="image/jpeg">
+                    <img src="@x.GetCropUrl("square-sm")&quality=70" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", x)" class="img-fluid ">
+               
+                </picture>
+            </div>
+            i++;    
+            }
+            
+            @if (blockImages.Count()>1){
+                @Html.Raw("</div>")
+                @Html.Raw("<div class=\"swiper-button-prev\"></div>")
+                @Html.Raw("<div class=\"swiper-button-next\"></div>")
+                @Html.Raw("</div>")
+                @Html.Raw("</div>")
+
+            }
+        </div>    
+        }
+        
+        <div class="col-12 @(blockImages!=null ? "col-lg-6": "col-lg-8 mx-auto")  @(content.Value("revert").ToString()=="True" ? "order-lg-1" : "revert")">
+            <div class="place-text">
+                @if (content.Value("title").ToString()!=""){
+                    <h2>@Html.Raw(content.Value("title"))</h2> 
+                }
+                <div class="mt-4">
+                    @Html.Raw(content.Value("text").ToString())
+                </div> 
+            </div>
+        </div>
+            
+        </div>
+        </div>
+    </div>      
+}
+
+
+
+

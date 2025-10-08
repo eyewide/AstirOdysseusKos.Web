@@ -1,0 +1,86 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+	Layout = "MainTemplate.cshtml";
+	var root = Model.Root();
+	var bookingUrl="";
+	IEnumerable<IPublishedContent> offers=null;
+    if (Model.DescendantsOfType("offer").Where(x => x.IsVisible()).Count()>0){
+        offers = Model.DescendantsOfType("offer").Where(x => x.IsVisible());
+    }
+}
+
+<div class="page-bodytext-section py-offset"> 
+    <div class="container"> @*content-max-width text-content*@
+        <h1>
+            @Html.Raw(Model.Value("headerH1"))
+        </h1>
+        @Model.Value("bodyText")
+    </div>
+</div>
+
+
+@if (offers!=null){
+    foreach (var x in offers){
+        if (x.HasValue("offerBookingLink")){
+            bookingUrl = x.Value("offerBookingLink").ToString();
+        }else if (root.HasValue("bookingLink")){
+            bookingUrl=root.Value("bookingLink").ToString();
+        }
+            
+        <div class="section-row-bg offer-row">
+            <div class="row align-items-center position-relative g-0 ">
+            
+                <div class="col-12 col-md-7 col-xl-8 col-xxl-9 place-img order-md-2">
+                    @if (x.HasValue("imageForListing")){
+                        var img = x.Value<IPublishedContent>("imageForListing");
+                        if (img!=null){
+                            <div class="place-img ">
+                                <a href="@x.Url()" title="@Html.Raw(x.Value("menuTitle"))">
+                                    <picture>
+                                        <source srcset="@img.GetCropUrl("fullscreen")&quality=70&format=webp" media="(min-width: 1680px)" type="image/webp">
+                                        <source srcset="@img.GetCropUrl("fullscreen")&quality=70" media="(min-width: 1680px)" type="image/jpeg">
+                                        <source srcset="@img.GetCropUrl("horizontal-xl")&quality=70&format=webp" media="(min-width: 1200px)" type="image/webp">
+                                        <source srcset="@img.GetCropUrl("horizontal-xl")&quality=70" media="(min-width: 1200px)" type="image/jpeg">
+                                        <source srcset="@img.GetCropUrl("square-md")&quality=70&format=webp" media="(min-width: 992px)" type="image/webp">
+                                        <source srcset="@img.GetCropUrl("square-md")&quality=70" media="(min-width: 992px)" type="image/jpeg">
+                                        <source srcset="@img.GetCropUrl("horizontal-lg")&quality=70&format=webp" media="(min-width: 768px)" type="image/webp">
+                                        <source srcset="@img.GetCropUrl("horizontal-lg")&quality=70" media="(min-width: 768px)" type="image/jpeg">
+                                        <source srcset="@img.GetCropUrl("horizontal-md")&quality=70&format=webp" media="(min-width: 576px)" type="image/webp">
+                                        <source srcset="@img.GetCropUrl("horizontal-md")&quality=70" media="(min-width: 576px)" type="image/jpeg">
+                                        <source srcset="@img.GetCropUrl("square-sm")&quality=70&format=webp" media="(min-width: 0px)" type="image/webp">
+                                        <source srcset="@img.GetCropUrl("square-sm")&quality=70" media="(min-width: 0px)" type="image/jpeg">
+                                        <img src="@img.GetCropUrl("square-sm")&quality=70" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", img)" class="img-fluid fit-img">
+                                    </picture>
+                                </a>
+                            </div>
+                        }
+                    }
+                </div>
+                <div class="col-12 col-md-5 col-xl-4 col-xxl-3 order-md-1">
+                    <div class="place-text">
+                        <h2 class="sm-header"><a href="@x.Url()" title="@Html.Raw(x.Value("menuTitle"))">@x.Value("menuTitle")</a></h2>  
+                        @Html.Raw(x.Value("shortDescription"))
+                         
+                        <div class="pt-4">                            
+                            <a href="@x.Url()" title="@Html.Raw(x.Value("menuTitle"))" class="underline-btn white">
+                                @Umbraco.GetDictionaryValue("explore")
+                            </a>
+                            
+                            @*@if (bookingUrl!=""){
+                                <a href="@bookingUrl" target="_blank" class="btn btn--bordered ms-auto" title="@Html.Raw(Umbraco.GetDictionaryValue("bookNow"))">
+                                   @Html.Raw(Umbraco.GetDictionaryValue("bookNow"))
+                                </a>
+                            }*@
+                        </div> 
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+
+    
+@Html.GetBlockListHtml(Model, "bodySections")
+  

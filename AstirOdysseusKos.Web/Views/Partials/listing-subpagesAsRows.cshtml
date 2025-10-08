@@ -1,0 +1,61 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@model IPublishedContent
+
+@{ 
+    var childSelection = Model.Children.Where(x => x.IsVisible() && x.Id!=Model.Id); 
+
+    if (childSelection.Count()>0){
+        var i=1;
+  
+        foreach (var item in childSelection){
+            var j=1;
+
+            <div class="section-text-img pb-offset bg-white">
+                <div class="@(item.HasValue("imageForListing") ? "container-fluid" : "container")">
+                    <div class="row align-items-end position-relative"> 
+                    
+                        @if (item.HasValue("imageForListing")){
+                            var img = item.Value<IPublishedContent>("imageForListing");
+                            if (img!=null){
+                            <div class="col-12 col-lg-6 place-img position-relative g-0 @(i%2==1 ? "order-lg-2 revert" : null)" >
+                                @*<a href="@item.Url()" title="@Html.Raw(item.Value("menuTitle"))">*@
+                                <picture>
+                                    <source srcset="@img.GetCropUrl("horizontal-lg")&quality=70&format=webp" media="(min-width: 1200px)" type="image/webp">
+                                    <source srcset="@img.GetCropUrl("horizontal-lg")&quality=70" media="(min-width: 1200px)" type="image/jpeg">
+                                    <source srcset="@img.GetCropUrl("square-md")&quality=70&format=webp" media="(min-width: 992px)" type="image/webp">
+                                    <source srcset="@img.GetCropUrl("square-md")&quality=70" media="(min-width: 992px)" type="image/jpeg">
+                                    <source srcset="@img.GetCropUrl("horizontal-lg")&quality=70&format=webp" media="(min-width: 768px)" type="image/webp">
+                                    <source srcset="@img.GetCropUrl("horizontal-lg")&quality=70" media="(min-width: 768px)" type="image/jpeg">
+                                    <source srcset="@img.GetCropUrl("horizontal-md")&quality=70&format=webp" media="(min-width: 576px)" type="image/webp">
+                                    <source srcset="@img.GetCropUrl("horizontal-md")&quality=70" media="(min-width: 576px)" type="image/jpeg">
+                                    <source srcset="@img.GetCropUrl("square-sm")&quality=70&format=webp" media="(min-width: 0px)" type="image/webp">
+                                    <source srcset="@img.GetCropUrl("square-sm")&quality=70" media="(min-width: 0px)" type="image/jpeg">
+                                    <img src="@img.GetCropUrl("square-sm")&quality=70" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", img)" class="img-fluid ">
+                                </picture>
+                                @*</a>*@
+                            </div>
+                            }
+                        }
+
+                        <div class="col-12 @(item.HasValue("imageForListing") ? "col-lg-6": "col-lg-8 mx-auto") @(i%2==1 ? "order-lg-1" : "revert")"> 
+                            <div class="place-text">
+                                @if (item.Value("menuTitle").ToString()!=""){
+                                    <h2>@Html.Raw(item.Value("menuTitle"))</h2> 
+                                }
+                                <div class="mt-4">
+                                    @Html.Raw(item.Value("shortDescription").ToString())
+                                </div> 
+                                <div class="mt-3">
+                                    <a href="@item.Url()" title="@item.Value("menuTitle")" class="btn btn--more white text-center">@Umbraco.GetDictionaryValue("explore")</a>
+                                </div>
+                            </div>
+                        </div>
+                             
+                    </div>
+                </div>
+            </div>
+            i++;
+        }
+
+    }
+}

@@ -1,0 +1,41 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    var currentCulture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
+    var mediaNode = Model;
+    var altText = string.Empty;
+
+    switch (currentCulture.Substring(0,2).ToLower())
+    {
+        case "el":
+            if (mediaNode.HasValue("altTextGR") && !string.IsNullOrWhiteSpace(mediaNode.Value("altTextGR").ToString())){
+                altText = mediaNode.Value("altTextGR").ToString();  
+            }else{
+                altText = mediaNode.Value("altText").ToString();
+            }
+            break;
+        case "de":
+            if (mediaNode.HasValue("altTextDE") && !string.IsNullOrWhiteSpace(mediaNode.Value("altTextDE").ToString())){
+                altText = mediaNode.Value("altTextDE").ToString();  
+            }else{
+                altText = mediaNode.Value("altText").ToString();
+            }
+            break;
+        case "fr":
+            if (mediaNode.HasValue("altTextFR") && !string.IsNullOrWhiteSpace(mediaNode.Value("altTextFR").ToString())){
+                altText = mediaNode.Value("altTextFR").ToString();  
+            }else{
+                altText = mediaNode.Value("altText").ToString();
+            }
+            break;
+        default:
+            altText = mediaNode.Value<string>("altText");
+            break;
+    }
+    
+    @*if empty alt text show file name*@    
+    if (string.IsNullOrWhiteSpace(altText)){
+        altText = mediaNode.Name.ToString();
+    }
+
+}
+@altText

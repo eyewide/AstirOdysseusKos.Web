@@ -1,0 +1,39 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+	Layout = "MainTemplate.cshtml";
+}
+
+
+<div class="page-bodytext-section py-offset"> 
+    <div class="container"> @*content-max-width text-content*@
+        <h1>
+            @Html.Raw(Model.Value("headerH1"))
+        </h1>
+        @Model.Value("bodyText")
+        
+        <div class="d-md-flex justify-content-center align-items-start sitemap text-start">
+            @{
+            	var nodes = Model.Root().Children().Where(x => x.IsVisible() && x.Value<bool>("hideInNavigation")!= true);
+            	var nodesPerCol=nodes.Count()/2;
+            	var i=1;
+                <div class="m-5">
+                    @foreach (var item in nodes)
+                    {
+                        <p><a href="@item.Url()" class="@(item.IsAncestorOrSelf(Model) ? "active" : null)">
+                        @item.Value("menuTitle").ToString()
+                        </a></p>
+                        if (i==nodesPerCol){
+                            @Html.Raw("</div><div class=\"m-5\">")
+                        }
+                        i++;
+                    }
+                </div>
+            }
+        </div>
+        
+    </div>
+</div>
+
+
+@Html.GetBlockListHtml(Model, "bodySections")

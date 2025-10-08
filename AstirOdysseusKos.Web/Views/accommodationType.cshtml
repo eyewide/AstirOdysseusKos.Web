@@ -1,0 +1,92 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using Umbraco.Cms.Core.Models.Blocks;
+
+@{
+	Layout = "MainTemplate.cshtml";
+}
+
+<div class="page-bodytext-section py-offset bg-white room-page"> 
+    <div class="container"> @*content-max-width text-content*@
+        <h1>
+            @Html.Raw(Model.Value("headerH1"))
+        </h1>
+        @Model.Value("bodyText")
+
+        @*ROOM DETAILS *@      
+        @{
+          var blocks = Model.Value<IEnumerable<BlockListItem>>("roomDetails");
+          var counter=1;
+        
+          if (blocks.Count()>0){
+            <div class="d-flex room-details">
+              @foreach (var block in blocks){
+                var content = block.Content;
+                <div class="detail">
+                    @Html.Partial("~/Views/Partials/blockList/Components/" + content.ContentType.Alias+".cshtml", block)
+                </div>
+                counter++;
+              }
+            </div>
+          }
+        }
+        <div>
+            <a href="@Model.Value("bookingLink", fallback: Fallback.ToAncestors)" class="btn btn--book" title="@Html.Raw(Model.Value("menuTitle"))" target="_blank">
+                @Html.Raw(Umbraco.GetDictionaryValue("bookNow"))
+            </a>
+        </div>
+                
+    </div>
+</div>   
+   
+<div class="container-fluid section-gallery-facilities bg-white">    
+    <div class="row justify-content-center align-items-end">
+        @if (Model.HasValue("facilities")){
+            <div class="col-12 col-lg-6 order-lg-2">
+                <div class="facilities-section">
+                    <h2 class="">@Umbraco.GetDictionaryValue("header-facilities")</h2>
+                    @Model.Value("facilities")
+                </div>
+            </div>
+        }
+        @if (Model.Value<IEnumerable<IPublishedContent>>("galleryCarousel").Any()){
+            var blockImages=Model.Value<IEnumerable<IPublishedContent>>("galleryCarousel");
+            <div class="col-12 col-lg-6 order-lg-1">
+                <div class="galleryContainer">
+                    <div class="swiper simpleGallerySwiper">
+                        <div class="swiper-wrapper">
+                        @foreach (var x in blockImages){
+                            <div class="swiper-slide">
+                                <div class="image-box">
+                                    <div class="img-holder">
+                                    <picture>
+                                        <source srcset="@x.GetCropUrl("horizontal-lg")&quality=70&format=webp" media="(min-width: 1200px)" type="image/webp">
+                                        <source srcset="@x.GetCropUrl("horizontal-lg")&quality=70" media="(min-width: 1200px)" type="image/jpeg">
+                                        <source srcset="@x.GetCropUrl("square-md")&quality=70&format=webp" media="(min-width: 992px)" type="image/webp">
+                                        <source srcset="@x.GetCropUrl("square-md")&quality=70" media="(min-width: 992px)" type="image/jpeg">
+                                        <source srcset="@x.GetCropUrl("horizontal-lg")&quality=70&format=webp" media="(min-width: 768px)" type="image/webp">
+                                        <source srcset="@x.GetCropUrl("horizontal-lg")&quality=70" media="(min-width: 768px)" type="image/jpeg">
+                                        <source srcset="@x.GetCropUrl("horizontal-md")&quality=70&format=webp" media="(min-width: 576px)" type="image/webp">
+                                        <source srcset="@x.GetCropUrl("horizontal-md")&quality=70" media="(min-width: 576px)" type="image/jpeg">
+                                        <source srcset="@x.GetCropUrl("square-sm")&quality=70&format=webp" media="(min-width: 0px)" type="image/webp">
+                                        <source srcset="@x.GetCropUrl("square-sm")&quality=70" media="(min-width: 0px)" type="image/jpeg">
+                                        <img src="@x.GetCropUrl("square-sm")&quality=70" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", x)" class="img-fluid ">
+                                    </picture>
+                                </div>
+                                </div>
+                            </div>
+                        }
+                        </div>
+                        <div class="swiper-button-prev"></div>
+                        <div class="swiper-button-next"></div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>    
+</div>    
+
+             
+
+@Html.Partial("accommodation-other")
+ 

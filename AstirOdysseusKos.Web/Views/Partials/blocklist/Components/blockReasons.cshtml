@@ -1,0 +1,123 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Umbraco.Cms.Core.Models.Blocks.BlockListItem>;
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+@using Umbraco.Cms.Core.Models;
+@using Umbraco.Cms.Core.Models.Blocks;
+
+@{
+    var currentPage = Umbraco.AssignedContentItem;
+    var root = currentPage.Root();  
+    var content = (ContentModels.BlockReasons)Model.Content;
+    var settings = (ContentModels.GenericBlockSettings)Model.Settings;
+    var blockImg=content.Value<IPublishedContent>("image");
+    var boxesBlocks = content.Value<IEnumerable<BlockListItem>>("reasonsBoxes");
+    var i=1;
+    
+}
+
+@if (settings.Value("disableSection").ToString()!="True"){
+
+<div class="section-reasons">
+    <div class="border-container @(blockImg!=null ? null : "reasons-text-container")">
+        @*LEFT COLUMN img OR title*@
+        @if (blockImg!=null){
+            <div class="col-lg-6 place-img">
+                <picture>
+                    <source srcset="@blockImg.GetCropUrl("square-md")&quality=70&format=webp" media="(min-width: 1200px)" type="image/webp">
+                    <source srcset="@blockImg.GetCropUrl("square-md")&quality=70" media="(min-width: 1200px)" type="image/jpeg">
+                    <source srcset="@blockImg.GetCropUrl("vertical")&quality=70&format=webp" media="(min-width: 992px)" type="image/webp">
+                    <source srcset="@blockImg.GetCropUrl("vertical")&quality=70" media="(min-width: 992px)" type="image/jpeg">
+                    <source srcset="@blockImg.GetCropUrl("horizontal-md")&quality=70&format=webp" media="(min-width: 576px)" type="image/webp">
+                    <source srcset="@blockImg.GetCropUrl("horizontal-md")&quality=70" media="(min-width: 576px)" type="image/jpeg">
+                    <source srcset="@blockImg.GetCropUrl("square-sm")&quality=70&format=webp" media="(min-width: 0px)" type="image/webp">
+                    <source srcset="@blockImg.GetCropUrl("square-sm")&quality=70" media="(min-width: 0px)" type="image/jpeg">
+                    <img src="@blockImg.GetCropUrl("square-sm")&quality=70" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", blockImg)" class="img-fluid">
+                </picture>
+            </div>
+        }else if (content.Value("title").ToString()!=""){
+            
+            <div class="col-12 col-lg-4">
+                <h2>@Html.Raw(content.Value("title"))</h2> 
+                @if (root.HasValue("bookingLink").ToString()!=""){
+                    <a href="@root.Value("bookingLink").ToString()" class="btn btn--book" target="_blank" title="@Umbraco.GetDictionaryValue("bookNow")">
+                        @Html.Raw(@Umbraco.GetDictionaryValue("bookNow"))
+                    </a>
+                }
+            </div>
+        }
+        
+        @*RIGHT COLUMN*@
+        <div class="place-text @(blockImg!=null ? "col-lg-6 reasons-boxes-container" : "col-lg-8 reasons-text")">                
+        
+
+            @if (content.Value("text").ToString()!=""){
+                <div>@Html.Raw(content.Value("text"))</div> 
+            }
+            @*template boxes*@
+            <div>
+            @if (blockImg!=null && content.Value("title").ToString()!=""){
+                <h2 class="bordered">@Html.Raw(content.Value("title"))</h2> 
+            }
+            @if (boxesBlocks!=null && boxesBlocks.Count()>0){
+              <div class="reasons-boxes row">
+                @foreach (var item in boxesBlocks){
+                    var boxContent = (ContentModels.BlockNestedReasonBox)item.Content;
+                    var boxSettings = (ContentModels.GenericBlockSettings)item.Settings;
+                    IPublishedContent boxLink = boxContent.Value<IPublishedContent>("linkToPage");
+
+                    if (boxSettings.Value("disableSection").ToString()!="True"){  
+                        <div class="column">
+                            @if (boxContent.Value<IPublishedContent>("icon")!=null){
+                                var icon=boxContent.Value<IPublishedContent>("icon");
+                                <div class="icon">
+                                @{ Traverse(icon, boxContent.Value("title").ToString()); }
+                                </div>
+                            }
+            
+                            @if(boxLink!= null){
+                                <a href="@boxLink.Url()" title="@boxContent.Value("title").ToString()">
+                                   @Html.Raw(boxContent.Value("title").ToString())
+                                </a>
+                                    
+                            }
+                        </div>
+                    }
+                }
+              </div>
+            }
+            </div>
+            @if (blockImg!=null && root.HasValue("bookingLink").ToString()!=""){
+                <div class="btn-right">
+                    <a href="@root.Value("bookingLink").ToString()" class="btn btn--book" target="_blank" title="@Umbraco.GetDictionaryValue("bookNow")">
+                        @Html.Raw(@Umbraco.GetDictionaryValue("bookNow"))
+                    </a>
+                </div>
+            }
+            @*end template boxes*@
+            
+        </div>
+            
+            
+	 </div>
+</div>
+
+
+}
+
+
+@{
+    void Traverse(IPublishedContent? icon, string title) {
+
+        if (icon.Value("umbracoExtension").ToString()=="svg" ){
+           <img src="@icon.Url()" alt="@title" class="img-fluid">             
+        }else{
+            <picture>
+                 <source srcset="@icon.Url()?height=100&quality=70&format=webp" media="(min-width: 0px)" type="image/webp">
+                <source srcset="@icon.Url()?height=100&quality=70" media="(min-width: 0px)" type="image/jpeg">
+                <img src="@icon.Url()?height=100&quality=70" alt="@title" class="img-fluid">
+            </picture>
+        }
+    }
+}
+   
+    
+

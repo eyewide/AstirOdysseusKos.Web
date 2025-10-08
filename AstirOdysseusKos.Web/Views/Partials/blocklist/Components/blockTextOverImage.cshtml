@@ -1,0 +1,49 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Umbraco.Cms.Core.Models.Blocks.BlockListItem>;
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+
+@{
+    var currentPage = Umbraco.AssignedContentItem;
+    var content = (ContentModels.BlockTextOverImage)Model.Content;
+    var settings = (ContentModels.GenericBlockSettings)Model.Settings;
+    var blockImage = content.Value<IPublishedContent>("image");
+    var i=1;
+}
+
+@if (settings.Value("disableSection").ToString()!="True"){
+
+    <div class="text-over-img-section mt-offset"> 
+         @if (blockImage!=null){
+            <picture>                        
+                <source srcset="@blockImage.GetCropUrl("horizontal-xl")&quality=70&format=webp" media="(min-width: 1480px)" type="image/webp">
+                <source srcset="@blockImage.GetCropUrl("horizontal-xl")&quality=70" media="(min-width: 1480px)" type="image/jpeg">
+                <source srcset="@blockImage.GetCropUrl("horizontal-lg")&quality=70&format=webp" media="(min-width: 992px)" type="image/webp">
+                <source srcset="@blockImage.GetCropUrl("horizontal-lg")&quality=70" media="(min-width: 992px)" type="image/jpeg">
+                <source srcset="@blockImage.GetCropUrl("horizontal-md")&quality=70&format=webp" media="(min-width: 768px)" type="image/webp">
+                <source srcset="@blockImage.GetCropUrl("horizontal-md")&quality=70" media="(min-width: 768px)" type="image/jpeg">
+                <source srcset="@blockImage.GetCropUrl("horizontal-sm")&quality=70&format=webp" media="(min-width: 576px)" type="image/webp">
+                <source srcset="@blockImage.GetCropUrl("horizontal-sm")&quality=70" media="(min-width: 576px)" type="image/jpeg">
+                <source srcset="@blockImage.GetCropUrl("horizontal-xs")&quality=70&format=webp" media="(min-width: 0px)" type="image/webp">
+                <source srcset="@blockImage.GetCropUrl("horizontal-xs")&quality=70" media="(min-width: 0px)" type="image/jpeg">
+                <img src="@blockImage.GetCropUrl("horizontal-xs")&quality=70" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", blockImage)" class="img-fluid img-fit">
+            </picture>
+        }
+        
+        <div class="text-over col-12 col-md-10 col-lg-8 col-xl-6">
+            @if (content.Value("title").ToString()!=""){
+                <h2>@Html.Raw(content.Value("title"))
+                   @* @if (content.Value("subtitle").ToString()!=""){
+                        <span class="section-subtitle">@Html.Raw(content.Value("subtitle").ToString())</span>
+                    }*@
+                </h2> 
+            }
+            <div class="mt-4">
+                @Html.Raw(content.Value("text").ToString())
+            </div>   
+        </div>  
+    </div>
+
+}
+
+
+
+

@@ -1,0 +1,34 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Umbraco.Cms.Core.Models.Blocks.BlockListItem>;
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+
+@{
+    var content = (ContentModels.BlockImageOnly)Model.Content;
+    var settings = (ContentModels.GenericBlockSettings)Model.Settings;
+    var blockImage=content.Value<IPublishedContent>("image");
+}
+
+@if (settings.Value("disableSection").ToString()!="True"){
+    if (blockImage!=null){
+
+        <div class="container-fluid g-0 position-relative">
+            <picture>
+                <source srcset="@blockImage.GetCropUrl("fullscreen")&quality=70&format=webp" media="(min-width: 1680px)" type="image/webp">
+                <source srcset="@blockImage.GetCropUrl("fullscreen")&quality=70" media="(min-width: 1680px)" type="image/jpeg">
+                <source srcset="@blockImage.GetCropUrl("horizontal-xl")&quality=70&format=webp" media="(min-width: 1200px)" type="image/webp">
+                <source srcset="@blockImage.GetCropUrl("horizontal-xl")&quality=70" media="(min-width: 1200px)" type="image/jpeg">
+                <source srcset="@blockImage.GetCropUrl("horizontal-lg")&quality=70&format=webp" media="(min-width: 992px)" type="image/webp">
+                <source srcset="@blockImage.GetCropUrl("horizontal-lg")&quality=70" media="(min-width: 992px)" type="image/jpeg">
+                <source srcset="@blockImage.GetCropUrl("horizontal-md")&quality=70&format=webp" media="(min-width: 768px)" type="image/webp">
+                <source srcset="@blockImage.GetCropUrl("horizontal-md")&quality=70" media="(min-width: 768px)" type="image/jpeg">
+                  <source srcset="@blockImage.GetCropUrl("square-md")&quality=70&format=webp" media="(max-width: 767px)" type="image/webp">
+                <source srcset="@blockImage.GetCropUrl("square-md")&quality=70" media="(max-width: 767px)" type="image/jpeg">
+                <source srcset="@blockImage.GetCropUrl("square-xs")&quality=70&format=webp" media="(max-width: 575px)" type="image/webp">
+                <source srcset="@blockImage.GetCropUrl("square-xs")&quality=70" media="(max-width: 575px)" type="image/jpeg">
+                <img src="@blockImage.GetCropUrl("square-xs")&quality=70" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", blockImage)" class="img-fluid fit-img">
+            </picture>
+        </div>
+    }
+}
+
+
+

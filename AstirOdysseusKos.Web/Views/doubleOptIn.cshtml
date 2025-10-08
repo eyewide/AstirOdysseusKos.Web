@@ -1,0 +1,37 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+	Layout = "MainTemplate.cshtml";
+}
+
+<div class="page-bodytext-section py-offset"> 
+    <div class="container"> @*content-max-width text-content*@
+        <h1>
+            @Html.Raw(Model.Value("headerH1"))
+        </h1>
+        @Model.Value("bodyText")
+    </div>
+</div>
+
+
+
+
+
+@section Scripts
+{
+
+<script>
+    // Get the URL search string (everything after the "?")
+    const queryString = window.location.search;
+    
+    // Create a URLSearchParams object from the query string
+    const params = new URLSearchParams(queryString);
+    
+    // Access specific parameters by name
+    const name = params.get('name');
+
+    // Use the variables to modify your page content
+    document.getElementById('nlname').textContent = name;
+</script>	
+
+}

@@ -1,0 +1,104 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+
+@{
+    var root= Model.Root();
+
+	IEnumerable<IPublishedContent> rooms=null;
+    if (root.DescendantsOfType("accommodationType").Where(x => x.IsVisible()).Count()>0){
+        rooms = root.DescendantsOfType("accommodationType").Where(x => x.IsVisible());
+    }
+    var i=1;
+    
+    <div class="row mt-5">
+    
+             <div class="sliderContainer">
+                <div class="swiper roomsSwiper">
+                    <div class="swiper-wrapper">
+                    
+            @if (rooms!=null){
+                foreach (var x in rooms){ 
+
+                  <div class="swiper-slide">
+                <div class="image-box">
+                    <div class="img-holder">
+                            @if (x.HasValue("imageForListing")){
+                                var img = x.Value<IPublishedContent>("imageForListing");
+                                if (img!=null){
+                                    
+                                        <a href="@x.Url()" title="@Html.Raw(x.Value("menuTitle"))">
+                                        <picture>
+                                            <source srcset="@img.GetCropUrl("horizontal-md")&quality=70&format=webp" media="(min-width: 1600px)" type="image/webp">
+                                            <source srcset="@img.GetCropUrl("horizontal-md")&quality=70" media="(min-width: 1600px)" type="image/jpeg">
+                                            <source srcset="@img.GetCropUrl("square-lg")&quality=70&format=webp" media="(min-width: 1200px)" type="image/webp">
+                                            <source srcset="@img.GetCropUrl("square-lg")&quality=70" media="(min-width: 1200px)" type="image/jpeg">
+                                            <source srcset="@img.GetCropUrl("square-sm")&quality=70&format=webp" media="(min-width: 992px)" type="image/webp">
+                                            <source srcset="@img.GetCropUrl("square-sm")&quality=70" media="(min-width: 992px)" type="image/jpeg">
+                                            <source srcset="@img.GetCropUrl("vertical-lg")&quality=70&format=webp" media="(min-width: 768px)" type="image/webp">
+                                            <source srcset="@img.GetCropUrl("vertical-lg")&quality=70" media="(min-width: 768px)" type="image/jpeg">
+                                            <source srcset="@img.GetCropUrl("horizontal-sm")&quality=70&format=webp" media="(min-width: 576px)" type="image/webp">
+                                            <source srcset="@img.GetCropUrl("horizontal-sm")&quality=70" media="(min-width: 576px)" type="image/jpeg">
+                                            <source srcset="@img.GetCropUrl("square-sm")&quality=70&format=webp" media="(min-width: 0px)" type="image/webp">
+                                            <source srcset="@img.GetCropUrl("square-sm")&quality=70" media="(min-width: 0px)" type="image/jpeg">
+                                            <img src="@img.GetCropUrl("square-sm")&quality=70" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", img)" class="img-fluid ">
+                                        </picture></a>
+                               
+                                }
+                            }
+                            <div class="btn-over-img">
+                                <a href="@x.Value("bookingLink", fallback: Fallback.ToAncestors)" target="_blank" class="btn btn--book" title="@Html.Raw(Umbraco.GetDictionaryValue("bookNow"))">
+                                   @Html.Raw(Umbraco.GetDictionaryValue("bookNow"))
+                                </a>
+                            </div>
+                                    
+                        </div> 
+                        <div class="text-holder">
+                       
+                                <h2 class="h3 header-underline"><a href="@x.Url()" title="@Html.Raw(x.Value("menuTitle"))">@x.Value("menuTitle")</a></h2>  
+                                
+                               
+                                @*ROOM DETAILS       *@      
+                                @*@{
+                                  var blocks = x.Value<IEnumerable<BlockListItem>>("roomDetails");
+                                  var counter=1;
+                                
+                                  if (blocks.Count()>0){
+                                    <div class="d-flex align-items-center">
+                                                    
+                                      @foreach (var block in blocks){
+                                        var content = block.Content;
+                                        <div class="room-details">
+                                            @Html.Partial("~/Views/Partials/blockList/Components/" + content.ContentType.Alias+".cshtml", block)
+                                        </div>
+                                        counter++;
+                                      }
+        
+                                    </div>
+                                  }
+                                }*@
+                                
+                                <div class="description">@Html.Raw(x.Value("shortDescription"))</div>
+                                 
+                                <div class="mt-4 text-start">
+                                    <a href="@x.Url()" title="@Html.Raw(x.Value("menuTitle"))" class="box-link">
+                                        @Umbraco.GetDictionaryValue("more")
+                                    </a>
+                                    
+                                </div>
+                     </div>
+                    </div>
+                </div>
+                i++;
+                }
+            }
+            
+            </div>
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+                </div>
+            </div>
+            
+        </div>    
+        
+}
+
+        

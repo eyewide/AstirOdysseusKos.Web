@@ -1,0 +1,82 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Umbraco.Cms.Core.Models.Blocks.BlockListItem>;
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+@using Umbraco.Cms.Core.Models;
+@using Umbraco.Cms.Core.Models.Blocks;
+
+@{
+    var content = (ContentModels.BlockOffersCarousel)Model.Content;
+    var settings = (ContentModels.GenericBlockSettings)Model.Settings;
+    IPublishedContent nodePicker = content.Value<IPublishedContent>("nodeSelection");
+    var i=1;
+}
+
+@if (settings.Value("disableSection").ToString()!="True"){
+
+<div class="pt-offset bg-white section-carousel offers">
+    <div class="container text-holder">
+        @if (content.Value("title").ToString()!=""){
+            <h2>@Html.Raw(content.Value("title"))</h2> 
+        }
+        @if (content.Value("text").ToString()!=""){
+            <div>@Html.Raw(content.Value("text"))</div> 
+        }
+    </div>
+    
+    @if (nodePicker != null && nodePicker.Children.Where(x => x.IsVisible()).Count()>0){
+        var subpages = nodePicker.Children.Where(x => x.IsVisible());
+
+	    <div class="position-relative">
+	    <div class="swiper boxesSwiper holder-arrows-left">
+
+            <div class="swiper-wrapper">
+      
+			    @foreach (var node in subpages) {
+			     <div class="swiper-slide position-relative">
+			         <div class="two-cols-box">
+			             <div class="box-text">
+                            <h3 class="title">@Html.Raw(node.Value("menuTitle"))</h3>  
+                            <div class="text-space">
+                                @if (node.Value("shortDescription").ToString()!=""){
+                                    @Html.Raw(node.Value("shortDescription"))
+                                }
+                      
+                                <div class="mt-3">
+                                    <a class="underline-btn white" href="@node.Url()">@Umbraco.GetDictionaryValue("explore")</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="img-holder">
+                         @if (node.HasValue("imageForListing")){
+            			        var img = node.Value<IPublishedContent>("imageForListing");
+                                <picture>
+                                    <source srcset="@img.GetCropUrl("vertical-lg")&quality=70&format=webp" media="(min-width: 768px)" type="image/webp">
+                                    <source srcset="@img.GetCropUrl("vertical-lg")&quality=70" media="(min-width: 768px)" type="image/jpeg">
+                                     <source srcset="@img.GetCropUrl("square-md")&quality=70&format=webp" media="(min-width: 480px)" type="image/webp">
+                                    <source srcset="@img.GetCropUrl("square-md")&quality=70" media="(min-width: 480px)" type="image/jpeg">
+                                    <source srcset="@img.GetCropUrl("vertical")&quality=70&format=webp" media="(min-width: 340px)" type="image/webp">
+                                    <source srcset="@img.GetCropUrl("vertical")&quality=70" media="(min-width: 340px)" type="image/jpeg">
+                                    <source srcset="@img.GetCropUrl("vertical-sm")&quality=70&format=webp" media="(min-width: 0px)" type="image/webp">
+                                    <source srcset="@img.GetCropUrl("vertical-sm")&quality=70" media="(min-width: 0px)" type="image/jpeg">
+                                    <img src="@img.GetCropUrl("vertical-sm")&quality=70" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", img)" class="img-fluid">
+                                </picture>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+                    i++;
+                }
+			</div>	
+			
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+            
+        </div>
+    	</div>
+	
+	 }
+	
+</div>
+
+
+}

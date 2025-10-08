@@ -1,0 +1,34 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using AstirOdysseusKos.Web.Models 
+@{
+	Layout = "MainTemplate.cshtml";
+}
+
+
+<div class="page-bodytext-section py-offset"> 
+    <div class="container"> @*content-max-width text-content*@
+        <h1>
+            @Html.Raw(Model.Value("headerH1"))
+        </h1>
+         @Model.Value("bodyText")
+    </div>
+</div>
+
+<div class="container-fluid bg-white">
+    <div class="row">
+        <div class="col-12 col-md-7 order-md-2">
+            <div class="form-holder">
+                @if (TempData["SuccessMessage"] == null) {
+                    Html.RenderPartial("~/Views/Partials/formContact.cshtml", new formContactViewModel());
+                }
+            </div>
+        </div>
+        <div class="col-12 col-md-5 order-md-1 g-0">
+            @Html.Raw(Umbraco.GetDictionaryValue("Map"))
+        </div>
+    </div>
+</div>  
+
+
+@Html.GetBlockListHtml(Model, "bodySections")

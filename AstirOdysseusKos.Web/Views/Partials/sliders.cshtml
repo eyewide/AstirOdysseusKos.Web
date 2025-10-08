@@ -1,0 +1,85 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@model IPublishedContent
+
+@{
+var root = Model.Root();
+var mediaItems=Model.Value<IEnumerable<IPublishedContent>>("imagesSlider", fallback: Fallback.ToAncestors);
+IEnumerable<IPublishedElement> motosItems=null;
+    
+var title="";
+var imgBg="";	
+var i=1;
+var j=0;
+var countMotos=0;
+
+@*
+if (Model.HasValue("textOnSlider")){
+    motosItems = Model.Value<IEnumerable<IPublishedElement>>("textOnSlider", fallback: Fallback.ToLanguage);
+    countMotos=motosItems.Count();
+}
+*@
+
+if (mediaItems.Any()){
+
+  <div id="bigCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        @foreach (var item in mediaItems){
+            <div class="carousel-item @(i==1 ? "active" : null)">
+                <picture>
+                    <source srcset="@item?.GetCropUrl("fullscreen")&format=webp&quality=80" media="(min-width: 1661px)" type="image/webp">
+                    <source srcset="@item?.GetCropUrl("fullscreen")&quality=80" type="image/jpeg" media="(min-width: 1661px)">
+                    <source srcset="@item?.GetCropUrl("horizontal-xl")&format=webp&quality=80" media="(min-width: 1200px)" type="image/webp">
+                    <source srcset="@item?.GetCropUrl("horizontal-xl")&quality=80" type="image/jpeg" media="(min-width: 1200px)">
+                    <source srcset="@item?.GetCropUrl("square-lg")&format=webp&quality=80" media="(min-width: 768px)" type="image/webp">
+                    <source srcset="@item?.GetCropUrl("square-lg")&quality=80" type="image/jpeg" media="(min-width: 768px)">
+                    <source srcset="@item?.GetCropUrl("square-sm")&format=webp&quality=80" media="(min-width: 0px)" type="image/webp">
+                    <source srcset="@item?.GetCropUrl("square-sm")&quality=80" type="image/jpeg" media="(min-width: 0px)">
+                    <img src="@item?.GetCropUrl("square-sm")&quality=80" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", item)"> @*loading="lazy" *@
+                </picture>
+            </div> 
+        i++;
+        }
+    </div>    
+    
+       @* @if (Model.HasValue("textOnSlider")){
+            @if (Model.Level>1){
+                <div class="carousel-caption">
+                    <div class="h1" style="text-align: center;">
+                        <strong>@Html.Raw(Model.Value("textOnSlider"))</strong>
+                    </div>
+                </div>
+            }else{
+                <div class="carousel-caption d-none d-sm-block">
+                    <div class="h2" style="text-align: center;">
+                        @Html.Raw(Model.Value("textOnSlider"))
+                    </div>
+                </div>
+            }
+        }*@
+
+
+    @if (mediaItems.Count()>1){     
+        <button class="carousel-control-prev" type="button" data-bs-target="#bigCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#bigCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+    }
+</div>
+     
+
+		
+}
+
+
+}
+
+ 
+
+
+
+
+ 

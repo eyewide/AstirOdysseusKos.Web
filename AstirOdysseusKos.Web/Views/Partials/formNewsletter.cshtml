@@ -1,0 +1,66 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<AstirOdysseusKos.Web.Models.formNewsletterViewModel>
+@using AstirOdysseusKos.Web.Controllers
+@using AstirOdysseusKos.Web.Models
+@using Microsoft.Extensions.Configuration
+@using Microsoft.Extensions.Options
+
+@using (Html.BeginUmbracoForm<formNewsletterController>("Submit", FormMethod.Post, new { id = "NewsletterForm", @class = "newsletterform form-inline" }))
+{
+@*
+@using (Html.BeginUmbracoForm<formNewsletterController>("Submit", null, new {  id = "NewsletterForm", @class="newsletterform form-inline formRecap validateForm", onsubmit="arguments[0].preventDefault()"}))
+{*@
+    <div class="row gy-4">
+	    <div class="col-12 mb-1">
+	        @Html.LabelFor(x => Model.NameSec, @Umbraco.GetDictionaryValue("form_fName")+ " *", new { @class = "visually-hidden" })
+            @Html.TextBoxFor(x => Model.NameSec, new { @class = "form-control mailBox", @placeholder = @Umbraco.GetDictionaryValue("form_fName") + " *" })
+            @Html.ValidationMessageFor(x => Model.NameSec, @Umbraco.GetDictionaryValue("form_fName") + " " + @Umbraco.GetDictionaryValue("form_required"))
+        </div>
+        <div class="col-12 mb-1">
+            @Html.LabelFor(x => Model.EmailSec, @Umbraco.GetDictionaryValue("form_email")+ " *", new { @class = "visually-hidden" })
+            @Html.TextBoxFor(x => Model.EmailSec, new { @class = " form-control mailBox", @placeholder = @Umbraco.GetDictionaryValue("form_email") + " *" })
+            @Html.ValidationMessageFor(x => Model.EmailSec, @Umbraco.GetDictionaryValue("form_email") + " " + @Umbraco.GetDictionaryValue("form_required"))
+       </div>
+	   <div class="col-12 mb-1 text-start">
+	       <div class="form-agree mt-2">
+			@Html.CheckBoxFor(x => Model.AgreeSec, new { @class = "required" })
+			<label for="AgreeSec">
+				@Html.Raw(Umbraco.GetDictionaryValue("form_agree"))
+			</label>
+		    @Html.ValidationMessageFor(x => Model.AgreeSec, @Umbraco.GetDictionaryValue("form_required"))
+		    </div>
+		</div>
+		
+		<div class="m-0">
+		    <label><span class="invisible">hp field</span>
+                <honeypot-field></honeypot-field>
+            </label>
+            <label><span class="invisible">hp time</span>
+                <honeypot-time></honeypot-time>
+            </label>
+        </div>
+
+
+         <p role="alert" class="status-failure" hidden>
+            Connection failure, please try again.
+        </p>
+
+        <p role="alert" class="status-busy" hidden>
+            <img src="/images/loader.svg" alt="sending form"/>
+        </p>
+
+        <div class="col-12 submit">
+            <button type="submit" id="send" class="btn btn--more">@Html.Raw(Umbraco.GetDictionaryValue("form_Subscribe"))</button>
+        </div>    
+    </div>
+}
+@*
+<script>
+(function() {
+    onCompleted = function() {
+        document.getElementById("NewsletterForm").submit();
+    }
+})();
+</script>*@
+
+
+

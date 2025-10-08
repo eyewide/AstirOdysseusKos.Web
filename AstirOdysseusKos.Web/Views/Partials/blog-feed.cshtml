@@ -1,0 +1,98 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using System;
+@using System.IO;
+@using System.Xml.XPath;
+@using System.Xml;
+@{
+    //Fetch RSS XML
+    XmlTextReader feedUrl = new XmlTextReader("https://feeds.feedburner.com/astirodysseuskos/wq54xpuungz"); @*https://blog.astirodysseuskos.com/feed*@
+    //Create new XML document
+    XmlDocument doc = new XmlDocument();
+
+    //Load in our remote XML into our XML document
+    doc.Load(feedUrl);
+
+    XmlNamespaceManager nsMgr = new XmlNamespaceManager(doc.NameTable);
+    nsMgr.AddNamespace("content", "http://purl.org/rss/1.0/modules/content/");
+
+    //Select our nodes we want with some xPath
+    XmlNodeList feedItems = doc.SelectNodes("descendant::item");
+    var i = 1;
+}
+
+@if (feedItems.Count >0 ){
+    <div class="blog-section pt-offset">
+        <h2 class="">
+            @Html.Raw(@Umbraco.GetDictionaryValue("header-blog"))
+        </h2>
+        <div class="swiper blogCarousel">
+            <div class="swiper-wrapper">
+                @foreach (XmlNode item in feedItems) {
+                    var imgTag ="";
+                    string subStringEnd = "";
+                    string subStringStart = "";
+                    string finalImgUrl = "";
+                    var descriptionText="";
+                    
+                    var postTitle = item.SelectSingleNode("title").InnerText;
+                    var postDate = item.SelectSingleNode("pubDate").InnerText;
+                    var postLink = item.SelectSingleNode("link").InnerText;
+                    var postDescription = item.SelectSingleNode("description").InnerText.Replace("&#160; ","");
+                    @*
+                    var postTitle = item.SelectSingleNode("title").InnerText;
+                    var postDate = item.SelectSingleNode("pubDate").InnerText;
+                    var postLink = item.SelectSingleNode("link").InnerText;
+                    var postDescription = item.SelectSingleNode("description").InnerText;*2
+                    
+                    @* var postDescription = item.SelectSingleNode("content:encoded", nsMgr).InnerXml;*@
+                    @*XmlCDataSection cDataNode = (XmlCDataSection)(item.SelectSingleNode("description").ChildNodes[0]);
+                    string finalData = cDataNode.Data;*@
+
+                    int charDescPositionStart = postDescription.IndexOf("<p>");
+                    int charDescPositionEnd = postDescription.IndexOf("/>");
+                   @* var imgTag = postDescription.ToString().Substring(charDescPositionStart + 5, charDescPositionEnd - 5);
+                    string subStringEnd = imgTag.Substring(0, imgTag.IndexOf("sizes")-2);
+                    string subStringStart = subStringEnd.Substring(subStringEnd.LastIndexOf(",") + 2);
+                    string finalImgUrl = subStringStart.Substring(0, subStringStart.IndexOf(" "));*@
+                    
+                    
+                    if (postDescription.ToString().Contains("img")){
+                        imgTag = postDescription.ToString().Substring(0, charDescPositionStart - 1);
+                        subStringEnd = imgTag.Substring(0, imgTag.IndexOf("sizes")-2);
+                        subStringStart = subStringEnd.Substring(subStringEnd.LastIndexOf(",") + 2);
+                        finalImgUrl = subStringStart.Substring(0, subStringStart.IndexOf(" "));
+                        descriptionText="<p>" + postDescription.ToString().Substring(charDescPositionEnd + 2);
+                    }else{
+                        descriptionText="<p>" + postDescription.ToString().Substring(charDescPositionEnd + 4);
+                    }
+                    
+
+                    <div class="swiper-slide blog-slide">
+                        <div class="blog-slide-content">
+                            @if (finalImgUrl!=""){
+                                <img loading="lazy" src="@finalImgUrl" class="img-fluid fit-img" alt="@postTitle"/>
+                            }
+                            <div class="overlayText">
+                                <h3>
+                                    <a href="@postLink" target="_blank">
+                                        @*DESCRIPTION:  @Html.Raw(temp)*@
+                                        @postTitle
+
+                                        <div class="date">
+                                            @DateTime.Parse(postDate).ToString("dd MMM yyyy")
+                                        </div>
+                                    </a>
+                                </h3>
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+
+                    if (i == 6) break;
+                    i++;
+                }
+            </div>
+        </div>
+    </div>
+}

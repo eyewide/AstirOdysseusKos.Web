@@ -1,0 +1,56 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+	var currentCulture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
+    var allCultures = Model.Root().Cultures;
+
+
+    if (allCultures.Count()>1){
+        <div class="languagesDrop dropdown me-2 me-lg-4">
+            <button class="dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                @currentCulture.Substring(0,2).ToUpper() 
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                @foreach (var (culture, infos) in allCultures){
+                    if (culture!=currentCulture.ToString().ToLower()){
+                    <a  href="@(Model.Url(culture)!="#" ? Model.Url(culture): Model.Root().Url(culture))" class="dropdown-item @(culture==currentCulture.ToString().ToLower()? "active" : null)" aria-label="language">
+                        @culture.Substring(0,2).ToUpper() 
+                    </a>
+                    }
+                }
+            </div>
+        </div>
+    }
+}
+
+@{
+    void Traverse(string langName)
+    {
+        var str="";
+ 
+        switch(langName){
+            case "en":
+                str="EN";
+                break;
+            case "el":
+                str="ΕΛ";
+                break;
+            case "de":
+                str="DE";
+                break;
+            case "ru":
+                str="RU";
+                break;
+            case "it":
+                str="IT";
+                break;
+            case "fr":
+                str="FR";
+                break;
+        }
+        @str
+    }
+}
+
+
+
+                  

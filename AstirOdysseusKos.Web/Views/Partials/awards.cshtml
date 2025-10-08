@@ -1,0 +1,58 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using Umbraco.Cms.Core.Models.Blocks;
+
+@{
+var root= Model.Root();
+if (!Model.IsDocumentType("awardsPage") && root.DescendantsOfType("awardsPage").Where(x => x.IsVisible()).Count()>0){
+    var awardsNode = root.DescendantsOfType("awardsPage").Where(x => x.IsVisible()).First();
+    
+    if (awardsNode.Value<IEnumerable<BlockListItem>>("awards").Count()>0){
+    
+        var awardsAllBlocks = awardsNode.Value<IEnumerable<BlockListItem>>("awards").Reverse();
+        var awardsBlocks = awardsAllBlocks.Where(x => x.Content.Value("showInHomepage").ToString()=="True");
+        var counterAwards=1;
+
+        if (awardsBlocks.Count()>0){
+            <div class="awards-section mt-offset"> @*px-container-space*@
+                <div class="container"> 
+                    <h2 class="">
+                         @Html.Raw(@Umbraco.GetDictionaryValue("Awards"))
+                    </h2>
+                    
+                    <div class="bordered-container slider-container holder-arrows-bottom outside-desktop">
+                
+                        @if (awardsBlocks.Count()>3){
+                            @Html.Raw("<div class=\"swiper awardsSwiper \">")
+                            @Html.Raw("<div class=\"swiper-wrapper\">")
+                        }else{
+                            @Html.Raw("<div class=\"d-flex justify-content-center flex-wrap\">")
+                        }
+                            @foreach (var block in awardsBlocks){
+                                var content = block.Content;
+    
+                                if (block.Settings.Value("disableSection").ToString()!="True"){
+                                    <div class="@(awardsBlocks.Count()>3 ? "swiper-slide text-center" : "px-2 mb-4")">
+                                        @Html.Partial("~/Views/Partials/blockList/Components/" + content.ContentType.Alias+".cshtml", block)
+                                    </div>
+                                }
+                            }
+                
+                        @if (awardsBlocks.Count()>3){
+                            @Html.Raw("</div>")
+                           
+                            @Html.Raw("</div>")
+                             @Html.Raw("<div class=\"swiper-button-next\"></div>")
+                            @Html.Raw("<div class=\"swiper-button-prev\"></div>")
+                            @*@Html.Raw("<div class=\"swiper-pagination\"></div>")*@
+                            
+                        }else{
+                            @Html.Raw("</div>")
+                        }
+                    
+                    </div>
+                </div>
+            </div>    
+        }
+    } 
+}
+}
