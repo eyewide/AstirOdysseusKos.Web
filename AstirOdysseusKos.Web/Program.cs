@@ -35,6 +35,7 @@ builder.Services.Configure<GzipCompressionProviderOptions>(options =>
 });
 
 builder.Services.AddTransient<IConfigureOptions<StaticFileOptions>, ConfigureStaticFileOptions>();
+builder.Services.AddScoped<IBlogService, BlogService>();
 
 builder.CreateUmbracoBuilder()
     .AddBackOffice()

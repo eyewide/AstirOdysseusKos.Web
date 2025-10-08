@@ -1,5 +1,7 @@
-﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+﻿@using AstirOdysseusKos.Web.Services
+@using Umbraco.Cms.Web.Common.PublishedModels;
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+
 @using AstirOdysseusKos.Web.Models 
 @{
     Layout = null;
@@ -27,7 +29,7 @@
     }
     if (!Model.HasValue("hideSlider") || Model.Value("hideSlider").ToString()=="True" || Model.IsDocumentType("newspage")){
         classBody="no-slider";
-    }
+    }    
 }
 
 
