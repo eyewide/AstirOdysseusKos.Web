@@ -220,7 +220,7 @@
         <div class="noSlider-holder"></div>
     }
     
-    @Html.Partial("bookingForm")
+    @await Html.CachedPartialAsync("bookingForm", Model, TimeSpan.FromMinutes(60))
 
     @*
     @if (Model.Level>1){
@@ -246,7 +246,7 @@
                                      @Html.Raw(@Umbraco.GetDictionaryValue("header-newsletter"))
                                 </div>
                                 @{
-                                    Html.RenderPartial("~/Views/Partials/formNewsletter.cshtml", new formNewsletterViewModel());
+                                    @await Html.CachedPartialAsync("formNewsletter", new formNewsletterViewModel(), TimeSpan.FromMinutes(60));
                                 }
                             </div>
                         </div>
@@ -260,7 +260,7 @@
                 <div class="footerDivider">
                     <hr><img src="/images/logo-icon.svg" class="img-fluid" alt="@root.Value("Sitename")"><hr>
                 </div>
-                @Html.Partial("~/views/partials/navigation/footer-navigation.cshtml")
+                @await Html.CachedPartialAsync("Navigation/footer-navigation", Model, TimeSpan.FromMinutes(60))
 
                 <div class="contact">
                     @Html.Raw(root.Value("contactDetails"))
