@@ -70,15 +70,15 @@ public class BlogService : IBlogService
     }
   }
 
-  public async Task<string> GetBlogFeaturedImage(int id)
+  public async Task<FeaturedImage> GetBlogFeaturedImage(int id)
   {
     var baseUrl = GetBaseUrl();
     var apiKey = GetApiKey();
-
+    FeaturedImage featuredImage = new FeaturedImage();
     var request = new HttpRequestMessage
     {
       Method = HttpMethod.Get,
-      RequestUri = new Uri($"{baseUrl}/media/{id}?_fields=source_url,alt_text,slug"),
+      RequestUri = new Uri($"{baseUrl}/media/{id}?_fields=source_url,alt_text,slug,media_details"),
       Headers =
       {
         { "Authorization", $"Basic {apiKey}" }
@@ -96,16 +96,48 @@ public class BlogService : IBlogService
     using JsonDocument doc = await JsonDocument.ParseAsync(new MemoryStream(System.Text.Encoding.UTF8.GetBytes(responseBody)));
     if (doc.RootElement.TryGetProperty("source_url", out JsonElement featuredMediaElement))
     {
-      return featuredMediaElement.GetString();
+      featuredImage.SourceUrl = featuredMediaElement.GetString();
     }
 
-    return "";
+    if (doc.RootElement.TryGetProperty("alt_text", out JsonElement featuredImageAlt))
+    {
+      featuredImage.AltText = featuredImageAlt.GetString();
+    }
+
+    if (doc.RootElement.TryGetProperty("slug", out JsonElement featuredImageSlug))
+    {
+      featuredImage.Slug = featuredImageSlug.GetString();
+    }
+
+    if (doc.RootElement.TryGetProperty("media_details", out JsonElement mediaDetailsElement))
+    {
+      if (mediaDetailsElement.TryGetProperty("sizes", out JsonElement sizesElement))
+      {
+        foreach (var size in sizesElement.EnumerateObject())
+        {
+          if (size.NameEquals("medium") || size.NameEquals("medium_large") || size.NameEquals("large"))
+          {
+            // size.Value is an object like { "source_url": "...", "width": ..., ... }
+            if (size.Value.TryGetProperty("source_url", out JsonElement sourceUrlElement))
+            {
+              var sourceUrl = sourceUrlElement.GetString();
+              if (!string.IsNullOrEmpty(sourceUrl))
+              {
+                featuredImage.MediaSizes[size.Name] = sourceUrl;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return featuredImage;
   }
 
   public Task<BlogPost> GetBlogPostByIdAsync(int id) => throw new NotImplementedException();
 
   private string GetApiKey()
-  {    
+  {
     var apiUsername = _configuration["BlogSettings:Username"];
     var apiPassword = _configuration["BlogSettings:Password"];
     var credentials = $"{apiUsername}:{apiPassword}";

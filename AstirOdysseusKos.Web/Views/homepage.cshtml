@@ -3,139 +3,150 @@
 @using Umbraco.Cms.Core.Models.Blocks;
 
 @{
-	Layout = "MainTemplate.cshtml";
-    var textImages=Model.Value<IEnumerable<IPublishedContent>>("txtImages");
+  Layout = "MainTemplate.cshtml";
+  var textImages = Model.Value<IEnumerable<IPublishedContent>>("txtImages");
 }
 
-    <div class="intro-text-section py-offset" id="anchor-section">
-        <div class="@(textImages!=null && textImages.Count()>0 ? "container-fluid" : "container")">
-            <div class="row align-items-center">
-                <div class="col-12 @(textImages!=null && textImages.Count()>0 ? "col-lg-6": "col-lg-8 mx-auto")">
-                    <div class="@(textImages!=null && textImages.Count()>0 ? "place-text" : null)">
-                    <h1 class="mb-4">
-                        @Html.Raw(Model.Value("headerH1"))
-                        @*@if (Model.Value("subtitle").ToString()!=""){
+<div class="intro-text-section py-offset" id="anchor-section">
+  <div class="@(textImages != null && textImages.Count() > 0 ? "container-fluid" : "container")">
+    <div class="row align-items-center">
+      <div class="col-12 @(textImages != null && textImages.Count() > 0 ? "col-lg-6" : "col-lg-8 mx-auto")">
+        <div class="@(textImages != null && textImages.Count() > 0 ? "place-text" : null)">
+          <h1 class="mb-4">
+            @Html.Raw(Model.Value("headerH1"))
+            @*@if (Model.Value("subtitle").ToString()!=""){
                             <span class="section-subtitle">@Html.Raw(Model.Value("subtitle").ToString())</span>
                         }*@
-                    </h1>
-                    @Model.Value("bodyText")
-                    </div>
-                </div>
-                
-                @if (textImages!=null && textImages.Count()>0){
-                    <div class="col-12 col-lg-6 place-img position-relative g-0" >
-                    
-                    @if (textImages.Count()>1){
-                        @Html.Raw("<div class=\"sliderContainer\">")
-                        @Html.Raw("<div class=\"swiper simpleGallerySwiper\">")
-                        @Html.Raw("<div class=\"swiper-wrapper\">")
-                    }
-                    @foreach (var x in textImages){
-                        <div class="@(textImages.Count()>1 ? "swiper-slide" : null )">
-                            <picture>
-                                <source srcset="@x.GetCropUrl("square-lg")&quality=70&format=webp" media="(min-width: 1481px)" type="image/webp">
-                                <source srcset="@x.GetCropUrl("square-lg")&quality=70" media="(min-width: 1481px)" type="image/jpeg">
-                                <source srcset="@x.GetCropUrl("vertical-lg")&quality=70&format=webp" media="(min-width: 992px)" type="image/webp">
-                                <source srcset="@x.GetCropUrl("vertical-lg")&quality=70" media="(min-width: 992px)" type="image/jpeg">
-                                <source srcset="@x.GetCropUrl("horizontal-lg")&quality=70&format=webp" media="(min-width: 768px)" type="image/webp">
-                                <source srcset="@x.GetCropUrl("horizontal-lg")&quality=70" media="(min-width: 768px)" type="image/jpeg">
-                                <source srcset="@x.GetCropUrl("horizontal-md")&quality=70&format=webp" media="(min-width: 576px)" type="image/webp">
-                                <source srcset="@x.GetCropUrl("horizontal-md")&quality=70" media="(min-width: 576px)" type="image/jpeg">
-                                <source srcset="@x.GetCropUrl("square-sm")&quality=70&format=webp" media="(min-width: 0px)" type="image/webp">
-                                <source srcset="@x.GetCropUrl("square-sm")&quality=70" media="(min-width: 0px)" type="image/jpeg">
-                                <img src="@x.GetCropUrl("square-sm")&quality=70" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", x)" class="img-fluid ">
-                           
-                            </picture>
-                        </div>
-                    }
-                    @if (textImages.Count()>1){
-                        @Html.Raw("</div>")
-                        @Html.Raw("<div class=\"swiper-button-prev\"></div>")
-                        @Html.Raw("<div class=\"swiper-button-next\"></div>")
-                        @Html.Raw("</div>")
-                        @Html.Raw("</div>")
-        
-                    }
-                </div>    
-                }
-            </div>
+          </h1>
+          @Model.Value("bodyText")
         </div>
+      </div>
+
+      @if (textImages != null && textImages.Count() > 0)
+      {
+        <div class="col-12 col-lg-6 place-img position-relative g-0">
+
+          @if (textImages.Count() > 1)
+          {
+            @Html.Raw("<div class=\"sliderContainer\">")
+            @Html.Raw("<div class=\"swiper simpleGallerySwiper\">")
+            @Html.Raw("<div class=\"swiper-wrapper\">")
+          }
+          @foreach (var x in textImages)
+          {
+            <div class="@(textImages.Count() > 1 ? "swiper-slide" : null)">
+              <picture>
+                <source srcset="@x.GetCropUrl("square-lg")&quality=70&format=webp" media="(min-width: 1481px)" type="image/webp">
+                <source srcset="@x.GetCropUrl("square-lg")&quality=70" media="(min-width: 1481px)" type="image/jpeg">
+                <source srcset="@x.GetCropUrl("vertical-lg")&quality=70&format=webp" media="(min-width: 992px)" type="image/webp">
+                <source srcset="@x.GetCropUrl("vertical-lg")&quality=70" media="(min-width: 992px)" type="image/jpeg">
+                <source srcset="@x.GetCropUrl("horizontal-lg")&quality=70&format=webp" media="(min-width: 768px)" type="image/webp">
+                <source srcset="@x.GetCropUrl("horizontal-lg")&quality=70" media="(min-width: 768px)" type="image/jpeg">
+                <source srcset="@x.GetCropUrl("horizontal-md")&quality=70&format=webp" media="(min-width: 576px)" type="image/webp">
+                <source srcset="@x.GetCropUrl("horizontal-md")&quality=70" media="(min-width: 576px)" type="image/jpeg">
+                <source srcset="@x.GetCropUrl("square-sm")&quality=70&format=webp" media="(min-width: 0px)" type="image/webp">
+                <source srcset="@x.GetCropUrl("square-sm")&quality=70" media="(min-width: 0px)" type="image/jpeg">
+                <img src="@x.GetCropUrl("square-sm")&quality=70" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", x)" class="img-fluid ">
+
+              </picture>
+            </div>
+          }
+          @if (textImages.Count() > 1)
+          {
+            @Html.Raw("</div>")
+            @Html.Raw("<div class=\"swiper-button-prev\"></div>")
+            @Html.Raw("<div class=\"swiper-button-next\"></div>")
+            @Html.Raw("</div>")
+            @Html.Raw("</div>")
+
+          }
+        </div>
+      }
     </div>
-   
-   
-@Html.GetBlockListHtml(Model, "bodySections") 
+  </div>
+</div>
+
+
+@Html.GetBlockListHtml(Model, "bodySections")
 @*
 @Html.Partial("accommodation_intro")*@
 
 
-@await Html.PartialAsync("blog-api")
+@await Html.CachedPartialAsync(partialViewName: "blog-api", model: Model, cacheTimeout: TimeSpan.FromMinutes(60))
 
 @*INSTAGRAM SECTION
 ==============================*@
-@if (Model.HasValue("instagramImages")){
-    var mediaItems=Model.Value<IEnumerable<IPublishedContent>>("instagramImages");
-    <div class="px-container-space instagram-section pt-offset">
-        
-        <h2 class="h1">
-            @Html.Raw(Umbraco.GetDictionaryValue("header-Instagram"))
-        </h2>
-        <div class="instagram-container">
-            <div class="imgs d-flex">
-                @foreach (var j in mediaItems){
-                    <div class="InstaThumb">
-                        @if (Model.HasValue("instagramLink")){
-                            @Html.Raw("<a href=\""+ @Model.Value("instagramLink") +"\" target=\"_blank\">")
-                        }
-                        <picture>
-                            <source srcset="@j.GetCropUrl("vertical-lg")&format=webp" type="image/webp" media="(min-width: 768px)"> 
-                            <source srcset="@j.GetCropUrl("vertical-lg")" type="image/jpeg" media="(min-width: 768px)">
-                            <source srcset="@j.GetCropUrl("vertical")&format=webp" type="image/webp" media="(min-width: 576px)"> 
-                            <source srcset="@j.GetCropUrl("vertical")" type="image/jpeg" media="(min-width: 576px)">
-                            <source srcset="@j.GetCropUrl("vertical-sm")&format=webp" type="image/webp" media="(min-width: 0px)"> 
-                            <source srcset="@j.GetCropUrl("vertical-sm")" type="image/jpeg" media="(min-width: 0px)">
-                            <img src="@j.GetCropUrl("vertical-sm")" alt="@Model.Root().Value("Sitename")" class="img-fluid">
-                        </picture>
-                        @if (Model.HasValue("instagramLink")){
-                            @Html.Raw("</a>")
-                        }
-                    </div>
-                }
-            </div>        
-        </div>
-        @if (Model.HasValue("instagramHash")){
-            <div class="hash">@Model.Value("instagramHash")</div>
+@if (Model.HasValue("instagramImages"))
+{
+  var mediaItems = Model.Value<IEnumerable<IPublishedContent>>("instagramImages");
+  <div class="px-container-space instagram-section pt-offset">
+
+    <h2 class="h1">
+      @Html.Raw(Umbraco.GetDictionaryValue("header-Instagram"))
+    </h2>
+    <div class="instagram-container">
+      <div class="imgs d-flex">
+        @foreach (var j in mediaItems)
+        {
+          <div class="InstaThumb">
+            @if (Model.HasValue("instagramLink"))
+            {
+              @Html.Raw("<a href=\"" + @Model.Value("instagramLink") + "\" target=\"_blank\">")
+            }
+            <picture>
+              <source srcset="@j.GetCropUrl("vertical-lg")&format=webp" type="image/webp" media="(min-width: 768px)">
+              <source srcset="@j.GetCropUrl("vertical-lg")" type="image/jpeg" media="(min-width: 768px)">
+              <source srcset="@j.GetCropUrl("vertical")&format=webp" type="image/webp" media="(min-width: 576px)">
+              <source srcset="@j.GetCropUrl("vertical")" type="image/jpeg" media="(min-width: 576px)">
+              <source srcset="@j.GetCropUrl("vertical-sm")&format=webp" type="image/webp" media="(min-width: 0px)">
+              <source srcset="@j.GetCropUrl("vertical-sm")" type="image/jpeg" media="(min-width: 0px)">
+              <img src="@j.GetCropUrl("vertical-sm")" alt="@Model.Root().Value("Sitename")" class="img-fluid">
+            </picture>
+            @if (Model.HasValue("instagramLink"))
+            {
+              @Html.Raw("</a>")
+            }
+          </div>
         }
+      </div>
     </div>
-} 
-        
+    @if (Model.HasValue("instagramHash"))
+    {
+      <div class="hash">@Model.Value("instagramHash")</div>
+    }
+  </div>
+}
+
 @*REVIEWS SECTION
 ==============================*@
-@if (Model.Value<IEnumerable<BlockListItem>>("reviews").Count()>0){
-    var blocksReviews = Model.Value<IEnumerable<BlockListItem>>("reviews");
-    <div class="px-container-space testimonials-section mt-offset">
-        <div class="bg-white py-sm-offset testimonials-container">
-            <div class="container">
-                <h2 class="">
-                    @Html.Raw(@Umbraco.GetDictionaryValue("header-reviews"))
-                </h2>
-                <div class="swiper testimonialsSwiper holder-arrows-bottom">
-                    <div class="swiper-wrapper">
-                    @foreach (var block in blocksReviews){
-                        var content = block.Content;
-                        <div class="swiper-slide">
-                        @Html.Partial("~/Views/Partials/blockList/Components/" + content.ContentType.Alias+".cshtml", block)
-                        </div>
-                    }
-                    </div>	
-                    <div class="swiper-button-next"></div>
-                    <div class="swiper-button-prev"></div>
-                </div>
-            </div>
+@if (Model.Value<IEnumerable<BlockListItem>>("reviews").Count() > 0)
+{
+  var blocksReviews = Model.Value<IEnumerable<BlockListItem>>("reviews");
+  <div class="px-container-space testimonials-section mt-offset">
+    <div class="bg-white py-sm-offset testimonials-container">
+      <div class="container">
+        <h2 class="">
+          @Html.Raw(@Umbraco.GetDictionaryValue("header-reviews"))
+        </h2>
+        <div class="swiper testimonialsSwiper holder-arrows-bottom">
+          <div class="swiper-wrapper">
+            @foreach (var block in blocksReviews)
+            {
+              var content = block.Content;
+              <div class="swiper-slide">
+                @Html.Partial("~/Views/Partials/blockList/Components/" + content.ContentType.Alias + ".cshtml", block)
+              </div>
+            }
+          </div>
+          <div class="swiper-button-next"></div>
+          <div class="swiper-button-prev"></div>
         </div>
+      </div>
     </div>
+  </div>
 }
-    
 
-@Html.Partial("awards")        
+
+@Html.Partial("awards")
 
 

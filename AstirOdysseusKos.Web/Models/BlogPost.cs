@@ -6,6 +6,6 @@ public class BlogPost
   public string? Title { get; set; }
   public string? Excerpt { get; set; }
   public string? Slug { get; set; }
-  public string? FeaturedImage { get; set; }
+  public FeaturedImage? FeaturedImage { get; set; }
   public DateTime PublishedDate { get; set; }
 }
