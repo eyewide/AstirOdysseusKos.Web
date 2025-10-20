@@ -21,6 +21,7 @@
             <div class="blog-slide-content">
               @{
                 string imageSrc = string.Empty;
+                string webpImageSrc = string.Empty;
                 if (item.FeaturedImage != null)
                 {
                   if (blogPosts.IndexOf(item) == 0 && item.FeaturedImage.MediaSizes != null && item.FeaturedImage.MediaSizes.TryGetValue("large", out var large) && !string.IsNullOrEmpty(large))
@@ -28,8 +29,11 @@
                     imageSrc = !string.IsNullOrEmpty(large) 
                     ? large 
                     : item.FeaturedImage.SourceUrl is string url
-                    ? $"{url}?width=800&format=webp"
-                    : $"{item.FeaturedImage}?width=800&format=webp";
+                    ? $"{url}"
+                    : $"{item.FeaturedImage}";
+                    webpImageSrc = item.FeaturedImage.MediaSizes.TryGetValue("large_webp", out var largeWebp) && !string.IsNullOrEmpty(largeWebp)
+                    ? largeWebp
+                    : "";
                   }
 
                   if (blogPosts.IndexOf(item) > 0 && item.FeaturedImage.MediaSizes != null && item.FeaturedImage.MediaSizes.TryGetValue("medium_large", out var medium) && !string.IsNullOrEmpty(medium))
@@ -37,12 +41,18 @@
                     imageSrc = !string.IsNullOrEmpty(medium)
                     ? medium
                     : item.FeaturedImage.SourceUrl is string url
-                    ? $"{url}?width=800&format=webp"
-                    : $"{item.FeaturedImage}?width=800&format=webp";
-                  }                  
+                    ? $"{url}"
+                    : $"{item.FeaturedImage}";
+                    webpImageSrc = item.FeaturedImage.MediaSizes.TryGetValue("medium_large_webp", out var mediumWebp) && !string.IsNullOrEmpty(mediumWebp)
+                    ? mediumWebp
+                    : "";
+                  }
                 }
               }
-              <img loading="lazy" src="@imageSrc" class="img-fluid fit-img" alt="@item.Title" />
+              <picture>
+                <source srcset="@webpImageSrc" type="image/webp">
+                <img loading="lazy" src="@imageSrc" class="img-fluid fit-img" alt="@(!string.IsNullOrEmpty(item.FeaturedImage?.AltText) ? item.FeaturedImage.AltText : item.Title)" />
+              </picture>
               <div class="overlayText">
                 <h3>
                   <a href="@postUrl" target="_blank">

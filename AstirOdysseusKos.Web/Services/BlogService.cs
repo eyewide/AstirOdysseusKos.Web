@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using AstirOdysseusKos.Web.Models;
-using Umbraco.Cms.Core.Mapping;
 
 namespace AstirOdysseusKos.Web.Services;
 
@@ -9,14 +8,13 @@ public class BlogService : IBlogService
   private readonly HttpClient _httpClient;
   private readonly ILogger<BlogService> _logger;
   private readonly IConfiguration _configuration;
-  private readonly IUmbracoMapper _umbracoMapper;
+ 
 
-  public BlogService(HttpClient httpClient, ILogger<BlogService> logger, IConfiguration configuration, IUmbracoMapper umbracoMapper)
+  public BlogService(HttpClient httpClient, ILogger<BlogService> logger, IConfiguration configuration)
   {
     _httpClient = httpClient;
     _logger = logger;
     _configuration = configuration;
-    _umbracoMapper = umbracoMapper;
   }
 
   public async Task<List<BlogPost>> GetAllBlogPostsAsync(int count, int skip = 0, int language = 1)
@@ -121,9 +119,18 @@ public class BlogService : IBlogService
             if (size.Value.TryGetProperty("source_url", out JsonElement sourceUrlElement))
             {
               var sourceUrl = sourceUrlElement.GetString();
+
               if (!string.IsNullOrEmpty(sourceUrl))
               {
                 featuredImage.MediaSizes[size.Name] = sourceUrl;
+                
+                var webpSourceUrl = System.Text.RegularExpressions.Regex.Replace(
+                    sourceUrl,
+                    @"\.(jpg|png)$",
+                    ".$1.webp",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+                featuredImage.MediaSizes[$"{size.Name}_webp"] = webpSourceUrl;
               }
             }
           }
