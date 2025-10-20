@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Headers;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using AstirOdysseusKos.Web.Models;
 
 namespace AstirOdysseusKos.Web.Services;
@@ -8,7 +10,7 @@ public class BlogService : IBlogService
   private readonly HttpClient _httpClient;
   private readonly ILogger<BlogService> _logger;
   private readonly IConfiguration _configuration;
- 
+
 
   public BlogService(HttpClient httpClient, ILogger<BlogService> logger, IConfiguration configuration)
   {
@@ -23,43 +25,59 @@ public class BlogService : IBlogService
     var apiKey = GetApiKey();
     try
     {
-      var request = new HttpRequestMessage
-      {
-        Method = HttpMethod.Get,
-        RequestUri = new Uri($"{baseUrl}/posts?_fields=id,slug,title,excerpt,featured_media,date"),
-        Headers =
-        {
-          { "Authorization", $"Basic {apiKey}" }
-        },
-      };
+      var request = new HttpRequestMessage(HttpMethod.Get, $"{baseUrl}/posts?_fields=id,slug,title,excerpt,featured_media,date");
+      request.Headers.Authorization = new AuthenticationHeaderValue("Basic", apiKey);
 
       var response = await _httpClient.SendAsync(request);
       response.EnsureSuccessStatusCode();
 
-      var responseBody = await response.Content.ReadAsStringAsync();
-      var options = new JsonSerializerOptions
-      {
-        PropertyNameCaseInsensitive = true,
-      };
+      using var stream = await response.Content.ReadAsStreamAsync();
+
+      using var doc = await JsonDocument.ParseAsync(stream);
+
       var blogPosts = new List<BlogPost>();
-      using JsonDocument doc = await JsonDocument.ParseAsync(new MemoryStream(System.Text.Encoding.UTF8.GetBytes(responseBody)));
+      var imageFetchTasks = new List<Task>();
+      var semaphore = new SemaphoreSlim(5); // Limit concurrent image fetches
+
       foreach (var post in doc.RootElement.EnumerateArray())
       {
-        if (post.ValueKind == JsonValueKind.Object)
+        if (post.ValueKind != JsonValueKind.Object)
+          continue;
+
+        var blogPost = new BlogPost
         {
-          var blogPost = new BlogPost
+          Id = post.TryGetProperty("id", out var idProp) && idProp.TryGetInt32(out int idVal) ? idVal : 0,
+          Slug = post.TryGetProperty("slug", out var slugProp) ? slugProp.GetString() : string.Empty,
+          Title = post.TryGetProperty("title", out var titleProp) && titleProp.TryGetProperty("rendered", out var titleRendered) ? titleRendered.GetString() : string.Empty,
+          Excerpt = post.TryGetProperty("excerpt", out var excerptProp) && excerptProp.TryGetProperty("rendered", out var excerptRendered) ? excerptRendered.GetString() : string.Empty,
+          PublishedDate = post.TryGetProperty("date", out var dateProp) && dateProp.ValueKind == JsonValueKind.String && DateTime.TryParse(dateProp.GetString(), out DateTime dateVal) ? dateVal : DateTime.MinValue
+        };
+
+        if (post.TryGetProperty("featured_media", out var fmProp) && fmProp.TryGetInt32(out int mediaId) && mediaId > 0)
+        {
+          var t = Task.Run(async () =>
           {
-            Id = post.GetProperty("id").GetInt32(),
-            Slug = post.GetProperty("slug").GetString(),
-            Title = post.GetProperty("title").GetProperty("rendered").GetString(),
-            Excerpt = post.GetProperty("excerpt").GetProperty("rendered").GetString(),
-            PublishedDate = post.GetProperty("date").GetDateTime()
-          };
-          blogPost.FeaturedImage = await GetBlogFeaturedImage(post.GetProperty("featured_media").GetInt32());
-          blogPosts.Add(blogPost);
+            await semaphore.WaitAsync();
+            try
+            {
+              blogPost.FeaturedImage = await GetBlogFeaturedImage(mediaId);
+            }
+            finally
+            {
+              semaphore.Release();
+            }
+          });
+          imageFetchTasks.Add(t);
         }
+        blogPosts.Add(blogPost);
       }
-      return blogPosts.OrderByDescending(x => x.PublishedDate).Take(count).ToList<BlogPost>();
+      await Task.WhenAll(imageFetchTasks);
+
+      return blogPosts
+        .OrderByDescending(bp => bp.PublishedDate)
+        .Skip(skip)
+        .Take(count)
+        .ToList();
     }
     catch (Exception ex)
     {
@@ -67,81 +85,100 @@ public class BlogService : IBlogService
       return new List<BlogPost>();
     }
   }
+  
 
   public async Task<FeaturedImage> GetBlogFeaturedImage(int id)
   {
     var baseUrl = GetBaseUrl();
     var apiKey = GetApiKey();
-    FeaturedImage featuredImage = new FeaturedImage();
-    var request = new HttpRequestMessage
-    {
-      Method = HttpMethod.Get,
-      RequestUri = new Uri($"{baseUrl}/media/{id}?_fields=source_url,alt_text,slug,media_details"),
-      Headers =
-      {
-        { "Authorization", $"Basic {apiKey}" }
-      }
-    };
+    var featuredImage = new FeaturedImage { MediaSizes = new Dictionary<string, string>() };
+    var request = new HttpRequestMessage(HttpMethod.Get, $"{baseUrl}/media/{id}?_fields=source_url,alt_text,slug,media_details");
+    request.Headers.Authorization = new AuthenticationHeaderValue("Basic", apiKey);
 
-    var response = await _httpClient.SendAsync(request);
+    using var response = await _httpClient.SendAsync(request);
     response.EnsureSuccessStatusCode();
-    var responseBody = await response.Content.ReadAsStringAsync();
-    var options = new JsonSerializerOptions
-    {
-      PropertyNameCaseInsensitive = true,
-    };
 
-    using JsonDocument doc = await JsonDocument.ParseAsync(new MemoryStream(System.Text.Encoding.UTF8.GetBytes(responseBody)));
-    if (doc.RootElement.TryGetProperty("source_url", out JsonElement featuredMediaElement))
-    {
-      featuredImage.SourceUrl = featuredMediaElement.GetString();
-    }
+    using var stream = await response.Content.ReadAsStreamAsync();    
 
-    if (doc.RootElement.TryGetProperty("alt_text", out JsonElement featuredImageAlt))
-    {
-      featuredImage.AltText = featuredImageAlt.GetString();
-    }
+    using JsonDocument doc = await JsonDocument.ParseAsync(stream);
 
-    if (doc.RootElement.TryGetProperty("slug", out JsonElement featuredImageSlug))
-    {
-      featuredImage.Slug = featuredImageSlug.GetString();
-    }
+    if (doc.RootElement.TryGetProperty("source_url", out var src)) featuredImage.SourceUrl = src.GetString() ?? string.Empty;
+    if (doc.RootElement.TryGetProperty("alt_text", out var alt)) featuredImage.AltText = alt.GetString() ?? string.Empty;
+    if (doc.RootElement.TryGetProperty("slug", out var slug)) featuredImage.Slug = slug.GetString() ?? string.Empty;
 
-    if (doc.RootElement.TryGetProperty("media_details", out JsonElement mediaDetailsElement))
+    if (doc.RootElement.TryGetProperty("media_details",  out var mediaDetails) && mediaDetails.TryGetProperty("sizes", out var sizes))
     {
-      if (mediaDetailsElement.TryGetProperty("sizes", out JsonElement sizesElement))
+      foreach (var size in sizes.EnumerateObject())
       {
-        foreach (var size in sizesElement.EnumerateObject())
+        if (size.NameEquals("medium") || size.NameEquals("medium_large") || size.NameEquals("large") || size.NameEquals("full"))
         {
-          if (size.NameEquals("medium") || size.NameEquals("medium_large") || size.NameEquals("large"))
+          if (size.Value.TryGetProperty("source_url", out var sizeUrl))
           {
-            // size.Value is an object like { "source_url": "...", "width": ..., ... }
-            if (size.Value.TryGetProperty("source_url", out JsonElement sourceUrlElement))
+            var sourceUrl = sizeUrl.GetString();
+            if (!string.IsNullOrEmpty(sourceUrl))
             {
-              var sourceUrl = sourceUrlElement.GetString();
-
-              if (!string.IsNullOrEmpty(sourceUrl))
-              {
-                featuredImage.MediaSizes[size.Name] = sourceUrl;
-                
-                var webpSourceUrl = System.Text.RegularExpressions.Regex.Replace(
-                    sourceUrl,
-                    @"\.(jpg|png)$",
-                    ".$1.webp",
-                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-
-                featuredImage.MediaSizes[$"{size.Name}_webp"] = webpSourceUrl;
-              }
+              featuredImage.MediaSizes ??= new Dictionary<string, string>();
+              featuredImage.MediaSizes[size.Name] = sourceUrl;
+              var webpSourceUrl = Regex.Replace(sourceUrl, @"\.(jpg|png)$", ".$1.webp", RegexOptions.IgnoreCase);
+              featuredImage.MediaSizes[$"{size.Name}_webp"] = webpSourceUrl;
             }
           }
         }
       }
     }
-
     return featuredImage;
   }
 
-  public Task<BlogPost> GetBlogPostByIdAsync(int id) => throw new NotImplementedException();
+  public async Task<BlogPost> GetBlogPostByIdAsync(int id)
+  {
+    var baseUrl = GetBaseUrl();
+    var apiKey = GetApiKey();
+
+    try
+    {
+      var request = new HttpRequestMessage(HttpMethod.Get, $"{baseUrl}/posts/{id}?_fields=id,slug,title,excerpt,featured_media,date");
+      request.Headers.Authorization = new AuthenticationHeaderValue("Basic", apiKey);
+
+      var response = await _httpClient.SendAsync(request);
+      response.EnsureSuccessStatusCode();
+
+      using var stream = await response.Content.ReadAsStreamAsync();
+      using var doc = await JsonDocument.ParseAsync(stream);
+
+      var root = doc.RootElement;
+      if (root.ValueKind != JsonValueKind.Object)
+        return new BlogPost();
+
+      var blogPost = new BlogPost
+      {
+        Id = root.TryGetProperty("id", out var idProp) && idProp.TryGetInt32(out int idVal) ? idVal : 0,
+        Slug = root.TryGetProperty("slug", out var slugProp) ? slugProp.GetString() ?? string.Empty : string.Empty,
+        Title = root.TryGetProperty("title", out var titleProp) && titleProp.TryGetProperty("rendered", out var titleRendered) ? titleRendered.GetString() : string.Empty,
+        Excerpt = root.TryGetProperty("excerpt", out var excerptProp) && excerptProp.TryGetProperty("rendered", out var excerptRendered) ? excerptRendered.GetString() : string.Empty,
+        PublishedDate = root.TryGetProperty("date", out var dateProp) && dateProp.ValueKind == JsonValueKind.String && DateTime.TryParse(dateProp.GetString(), out DateTime dateVal) ? dateVal : DateTime.MinValue
+      };
+
+      if (root.TryGetProperty("featured_media", out var fmProp) && fmProp.TryGetInt32(out int mediaId) && mediaId > 0)
+      {
+        try
+        {
+          blogPost.FeaturedImage = await GetBlogFeaturedImage(mediaId);
+        }
+        catch (Exception ex)
+        {
+          // If featured image fetch fails, log but still return the post
+          _logger.LogWarning(ex, "Failed to fetch featured image for post {PostId} (media id {MediaId})", id, mediaId);
+        }
+      }
+
+      return blogPost;
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Error fetching blog post with id {Id}", id);
+      return new BlogPost();
+    }
+  }
 
   private string GetApiKey()
   {
