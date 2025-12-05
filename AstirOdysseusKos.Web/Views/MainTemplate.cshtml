@@ -1,7 +1,6 @@
 ﻿@using AstirOdysseusKos.Web.Services
 @using Umbraco.Cms.Web.Common.PublishedModels;
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
-
 @using AstirOdysseusKos.Web.Models 
 @{
     Layout = null;
@@ -36,7 +35,7 @@
 <!doctype html>
 <html lang="@currentCulture.Substring(0,2).ToLower()">
 <head>
-  @*  @Html.Partial("og-metas-schema")*@
+    @*@Html.Partial("og-metas-schema")*@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,6 +49,9 @@
 	}
 	
 
+
+    @Html.Raw(Umbraco.GetDictionaryValue("geo-meta"))
+    
     @Html.Partial("hreflangsettings")
 
 
@@ -260,7 +262,7 @@
                 <div class="footerDivider">
                     <hr><img src="/images/logo-icon.svg" class="img-fluid" alt="@root.Value("Sitename")"><hr>
                 </div>
-                @await Html.CachedPartialAsync("Navigation/footer-navigation", Model, TimeSpan.FromMinutes(60))
+                @await Html.PartialAsync("Navigation/footer-navigation", Model)
 
                 <div class="contact">
                     @Html.Raw(root.Value("contactDetails"))

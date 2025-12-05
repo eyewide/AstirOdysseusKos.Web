@@ -18,14 +18,14 @@ using Umbraco.Extensions;
 
 namespace Umbraco.Cms.Web.Common.PublishedModels
 {
-	/// <summary>offers</summary>
-	[PublishedModel("offers")]
-	public partial class Offers : PublishedContentModel, INavigation, ISEO, ISlider
+	/// <summary>Blog Article</summary>
+	[PublishedModel("blogArticle")]
+	public partial class BlogArticle : PublishedContentModel, ISEO
 	{
 		// helpers
 #pragma warning disable 0109 // new is redundant
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
-		public new const string ModelTypeAlias = "offers";
+		public new const string ModelTypeAlias = "blogArticle";
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
 		public new const PublishedItemType ModelItemType = PublishedItemType.Content;
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
@@ -34,20 +34,36 @@ namespace Umbraco.Cms.Web.Common.PublishedModels
 			=> PublishedModelUtility.GetModelContentType(publishedSnapshotAccessor, ModelItemType, ModelTypeAlias);
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
 		[return: global::System.Diagnostics.CodeAnalysis.MaybeNull]
-		public static IPublishedPropertyType GetModelPropertyType<TValue>(IPublishedSnapshotAccessor publishedSnapshotAccessor, Expression<Func<Offers, TValue>> selector)
+		public static IPublishedPropertyType GetModelPropertyType<TValue>(IPublishedSnapshotAccessor publishedSnapshotAccessor, Expression<Func<BlogArticle, TValue>> selector)
 			=> PublishedModelUtility.GetModelPropertyType(GetModelContentType(publishedSnapshotAccessor), selector);
 #pragma warning restore 0109
 
 		private IPublishedValueFallback _publishedValueFallback;
 
 		// ctor
-		public Offers(IPublishedContent content, IPublishedValueFallback publishedValueFallback)
+		public BlogArticle(IPublishedContent content, IPublishedValueFallback publishedValueFallback)
 			: base(content, publishedValueFallback)
 		{
 			_publishedValueFallback = publishedValueFallback;
 		}
 
 		// properties
+
+		///<summary>
+		/// Categories
+		///</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
+		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
+		[ImplementPropertyType("blogCategories")]
+		public virtual global::System.Collections.Generic.IEnumerable<string> BlogCategories => this.Value<global::System.Collections.Generic.IEnumerable<string>>(_publishedValueFallback, "blogCategories");
+
+		///<summary>
+		/// Tags
+		///</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
+		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
+		[ImplementPropertyType("blogTags")]
+		public virtual global::System.Collections.Generic.IEnumerable<string> BlogTags => this.Value<global::System.Collections.Generic.IEnumerable<string>>(_publishedValueFallback, "blogTags");
 
 		///<summary>
 		/// Body Sections
@@ -66,41 +82,35 @@ namespace Umbraco.Cms.Web.Common.PublishedModels
 		public virtual global::Umbraco.Cms.Core.Strings.IHtmlEncodedString BodyText => this.Value<global::Umbraco.Cms.Core.Strings.IHtmlEncodedString>(_publishedValueFallback, "bodyText");
 
 		///<summary>
-		/// Header (H1)
+		/// Image for Listing
 		///</summary>
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
 		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
-		[ImplementPropertyType("headerH1")]
-		public virtual string HeaderH1 => this.Value<string>(_publishedValueFallback, "headerH1");
+		[ImplementPropertyType("imageForListing")]
+		public virtual global::Umbraco.Cms.Core.Models.MediaWithCrops ImageForListing => this.Value<global::Umbraco.Cms.Core.Models.MediaWithCrops>(_publishedValueFallback, "imageForListing");
 
 		///<summary>
-		/// Show in Footer Menu
-		///</summary>
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
-		[ImplementPropertyType("footerMenu")]
-		public virtual bool FooterMenu => global::Umbraco.Cms.Web.Common.PublishedModels.Navigation.GetFooterMenu(this, _publishedValueFallback);
-
-		///<summary>
-		/// Hide in Navigation: If you don't want this page to appear in the navigation, check this box
-		///</summary>
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
-		[ImplementPropertyType("hideInNavigation")]
-		public virtual bool HideInNavigation => global::Umbraco.Cms.Web.Common.PublishedModels.Navigation.GetHideInNavigation(this, _publishedValueFallback);
-
-		///<summary>
-		/// Hide in Main Menu: NOT appear in the main navigation (header)
-		///</summary>
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
-		[ImplementPropertyType("hideMainMenu")]
-		public virtual bool HideMainMenu => global::Umbraco.Cms.Web.Common.PublishedModels.Navigation.GetHideMainMenu(this, _publishedValueFallback);
-
-		///<summary>
-		/// Menu Title
+		/// Title
 		///</summary>
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
 		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
-		[ImplementPropertyType("menuTitle")]
-		public virtual string MenuTitle => global::Umbraco.Cms.Web.Common.PublishedModels.Navigation.GetMenuTitle(this, _publishedValueFallback);
+		[ImplementPropertyType("postTitle")]
+		public virtual string PostTitle => this.Value<string>(_publishedValueFallback, "postTitle");
+
+		///<summary>
+		/// Published Date
+		///</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
+		[ImplementPropertyType("publishedDate")]
+		public virtual global::System.DateTime PublishedDate => this.Value<global::System.DateTime>(_publishedValueFallback, "publishedDate");
+
+		///<summary>
+		/// Short Description
+		///</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
+		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
+		[ImplementPropertyType("shortDescription")]
+		public virtual string ShortDescription => this.Value<string>(_publishedValueFallback, "shortDescription");
 
 		///<summary>
 		/// Meta Description
@@ -117,52 +127,5 @@ namespace Umbraco.Cms.Web.Common.PublishedModels
 		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
 		[ImplementPropertyType("metaTitle")]
 		public virtual string MetaTitle => global::Umbraco.Cms.Web.Common.PublishedModels.SEO.GetMetaTitle(this, _publishedValueFallback);
-
-		///<summary>
-		/// Fallback Video Url
-		///</summary>
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
-		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
-		[ImplementPropertyType("fallbackVideoUrl")]
-		public virtual string FallbackVideoUrl => global::Umbraco.Cms.Web.Common.PublishedModels.Slider.GetFallbackVideoUrl(this, _publishedValueFallback);
-
-		///<summary>
-		/// Hide Slider
-		///</summary>
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
-		[ImplementPropertyType("hideSlider")]
-		public virtual bool HideSlider => global::Umbraco.Cms.Web.Common.PublishedModels.Slider.GetHideSlider(this, _publishedValueFallback);
-
-		///<summary>
-		/// Images Slider
-		///</summary>
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
-		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
-		[ImplementPropertyType("imagesSlider")]
-		public virtual global::System.Collections.Generic.IEnumerable<global::Umbraco.Cms.Core.Models.MediaWithCrops> ImagesSlider => global::Umbraco.Cms.Web.Common.PublishedModels.Slider.GetImagesSlider(this, _publishedValueFallback);
-
-		///<summary>
-		/// Text on Slider
-		///</summary>
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
-		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
-		[ImplementPropertyType("textOnSlider")]
-		public virtual string TextOnSlider => global::Umbraco.Cms.Web.Common.PublishedModels.Slider.GetTextOnSlider(this, _publishedValueFallback);
-
-		///<summary>
-		/// Video Url
-		///</summary>
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
-		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
-		[ImplementPropertyType("videoUrl")]
-		public virtual string VideoUrl => global::Umbraco.Cms.Web.Common.PublishedModels.Slider.GetVideoUrl(this, _publishedValueFallback);
-
-		///<summary>
-		/// YouTube Video Url
-		///</summary>
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
-		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
-		[ImplementPropertyType("youTubeVideoUrl")]
-		public virtual string YouTubeVideoUrl => global::Umbraco.Cms.Web.Common.PublishedModels.Slider.GetYouTubeVideoUrl(this, _publishedValueFallback);
 	}
 }

@@ -1,0 +1,131 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using System.Text;
+@using System.Text.RegularExpressions;
+
+
+@{
+
+	IEnumerable<IPublishedContent> posts=null;
+    if (Model.DescendantsOfType("blogArticle").Count()>0){
+        posts = Model.DescendantsOfType("blogArticle").Where(x => x.IsVisible()).OrderByDescending(x=>x.Value<DateTime>("publishedDate")).Take(6); 
+    }
+    var i=1;
+
+    @if (posts!=null){ 
+          <section class="blog-section pt-offset">
+
+            <h2 class="">
+              @Html.Raw(@Umbraco.GetDictionaryValue("header-blog"))
+            </h2>
+            <div class="swiper blogCarousel">
+              <div class="swiper-wrapper">
+                    @foreach (var item in posts){
+                      <div class="swiper-slide blog-slide">
+                        <div class="blog-slide-content">
+                                         
+                                @if (item.HasValue("imageForListing") || item.HasValue("imageForListing", "el-GR")){
+                                    IPublishedContent img = null;
+                        
+                                    @if (item.HasValue("imageForListing")){
+                                      img = item.Value<IPublishedContent>("imageForListing");
+                                    }else{
+                                      img = item.Value<IPublishedContent>("imageForListing", "el-GR");
+                                    }
+                        
+                                    if (img != null)
+                                    {
+                                      <picture>
+                                        <source srcset="@img.GetCropUrl("square-lg")&quality=70&format=webp" media="(min-width: 1680px)" type="image/webp">
+                                        <source srcset="@img.GetCropUrl("square-lg")&quality=70" media="(min-width: 1680px)" type="image/jpeg">
+                                        <source srcset="@img.GetCropUrl("horizontal-md")&quality=70&format=webp" media="(min-width: 1200px)" type="image/webp">
+                                        <source srcset="@img.GetCropUrl("horizontal-md")&quality=70" media="(min-width: 1200px)" type="image/jpeg">
+                                        <source srcset="@img.GetCropUrl("square")&quality=70&format=webp" media="(min-width: 768px)" type="image/webp">
+                                        <source srcset="@img.GetCropUrl("square")&quality=70" media="(min-width: 768px)" type="image/jpeg">
+                                        <source srcset="@img.GetCropUrl("square-sm")&quality=70&format=webp" media="(min-width: 0px)" type="image/webp">
+                                        <source srcset="@img.GetCropUrl("square-sm")&quality=70" media="(min-width: 0px)" type="image/jpeg">
+                                        <img src="@img.GetCropUrl("square-sm")&quality=70" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", img)" class="img-fluid fit-img">
+                                      </picture>
+                                    }
+                                  }
+          
+                                
+                                <div class="overlayText">
+                                    <h3>
+                                        <a href="@item.Url()" title="@Html.Raw(item.Value("postTitle"))">
+                                        @Html.Raw(item.Value("postTitle"))
+                                        
+                                        <span class="date">
+                                          @Html.Raw(item.Value<DateTime>("PublishedDate").ToString("dd MMM yyyy"))
+                                        </span>
+                                        </a>
+                                    </h3>
+                                </div>
+                                
+                        </div>
+                      </div>
+                    i++;
+                    }
+                </div>
+            </div>
+        </section>  
+    }
+ 
+ }
+ 
+ 
+ @*ShortDescription substring*@
+ @{
+    void TruncateDescriptionAtWord(string? input, int length, bool appendDots = true)
+    {
+        if (input == null || input.Length < length){
+            @Html.Raw(input)
+        }else{
+            var iNextSpace = input.LastIndexOf(" ", length, StringComparison.Ordinal);
+            var trimmedInput = string.Format("{0}", input.Substring(0, (iNextSpace > 0) ? iNextSpace : length).Trim());
+        
+            if (appendDots)
+            {
+                @Html.Raw(trimmedInput) @Html.Raw("...")
+            }else{
+                @Html.Raw(trimmedInput) 
+            }
+        }
+        @*
+            int i = 0;
+            while(i + maxLength < input.Length)
+            {
+                int index = input.LastIndexOf(' ', i + maxLength);
+                    if(index<=0) //if word length > maxLength.
+                    {
+                        index=maxLength;
+                    }
+                @input.Substring(i, index - i);
+                i = index + 1;
+            }
+            @input.Substring(i);
+        *@
+    }
+    
+}
+ 
+@*BodyText substring*@
+ @{
+    void TruncateBodyAtWord(string? htmlString, int length)
+    {
+
+        var tagRegex = new Regex("<[^>]*>"); @*stripHtml*@
+        if(htmlString.Length > length){
+            var str = tagRegex.Replace(htmlString, "");
+        
+            if (str == null || str.Length < length){
+                @Html.Raw(str)
+            }else{
+                var iNextSpace = str.LastIndexOf(" ", length, StringComparison.Ordinal);
+                var trimmedInput = string.Format("{0}", str.Substring(0, (iNextSpace > 0) ? iNextSpace : length).Trim());
+                @Html.Raw(trimmedInput) @Html.Raw("...")
+            }
+         }
+    
+
+    }
+}

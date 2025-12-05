@@ -1,0 +1,37 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+
+    var root= Model.Root();
+    var query = HttpContextAccessor.HttpContext.Request.Query["cat"];
+  
+    var selectedCat = string.IsNullOrWhiteSpace(query)
+        ? null
+        : Uri.UnescapeDataString(query);
+        
+    var blogRoot = root.DescendantsOfType("blog").FirstOrDefault();
+
+    @if (blogRoot != null) {
+
+        var allPosts = blogRoot?.ChildrenOfType("blogArticle") ?? Enumerable.Empty<IPublishedContent>();
+        var allCategories = allPosts
+            .SelectMany(x => x.Value<IEnumerable<string>>("blogCategories") ?? Enumerable.Empty<string>())
+            .Distinct()
+            .ToList();
+      
+         
+        <nav class="blog-categories">
+            <ul>
+                @foreach (var cat in allCategories)
+                {
+                    var isActive = string.Equals(cat, selectedCat, StringComparison.OrdinalIgnoreCase);
+
+                    <li>
+                        <a href="@blogRoot.Url()?cat=@Uri.EscapeDataString(cat)" class="@(isActive ? "active" : "")">@cat</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+
+}

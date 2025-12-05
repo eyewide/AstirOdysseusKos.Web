@@ -1,0 +1,259 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.Blog>
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+@using Umbraco.Cms.Core.Models
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@using System.Text;
+@using System.Text.RegularExpressions;
+
+@{
+	Layout = "MainTemplate.cshtml";
+	int pageSize = Model.HasValue("pageSize") ? Model.Value<int>("pageSize") : 10;
+
+  IEnumerable<IPublishedContent> posts = null;
+  if (Model.DescendantsOfType("blogArticle").Count() > 0)
+  {
+    posts = Model.DescendantsOfType("blogArticle").Where(x => x.IsVisible()).OrderByDescending(x => x.Value<DateTime>("publishedDate"));
+  }
+
+  var getQueryTag = HttpContextAccessor.HttpContext.Request.Query["tag"];
+  var queryTag = getQueryTag.ToString().Replace("-", " ");
+  var getQueryCategory = HttpContextAccessor.HttpContext.Request.Query["cat"];
+  @*var queryCat = getQueryCategory.ToString().Replace("-", " ");*@
+  var queryCat = string.IsNullOrWhiteSpace(getQueryCategory) ? null : Uri.UnescapeDataString(getQueryCategory);
+        
+        
+  var i = 1;
+}
+
+
+
+<div class="page-bodytext-section blog-posts-list py-offset"> 
+    <div class="container"> @*content-max-width text-content*@
+        <h1>
+            @Html.Raw(Model.Value("headerH1"))
+        </h1>
+        
+       @Html.Partial("~/views/partials/Blog/blogCategories.cshtml")
+
+        
+        @Model.Value("bodyText")
+        
+        
+        @if (posts != null)
+                        {
+                          @*List By Category*@
+                          if (!string.IsNullOrEmpty(queryCat))
+                          {
+                
+                            var postsSelectionByCat = posts.Where(x => x.IsVisible() && String.Concat(x.Value<IEnumerable<string>>("blogCategories").Select(x => x).ToArray()).Contains(queryCat.ToString()));
+                            
+                           @* Filter posts that contain the selected category*@
+                            @*var postsSelectionByCat = allPosts
+                                    .Where(x => x.Value<IEnumerable<string>>("blogCategories")
+                                    ?.Contains(queryCat) == true);*@
+                     
+                            <div class="row">
+                              @foreach (var item in postsSelectionByCat)
+                              {
+                                Traverse(item);
+                                i++;
+                              }
+                            </div>
+                            @*List By Tag*@
+                          }
+                          else if (!string.IsNullOrEmpty(queryTag))
+                          {
+                
+                            var postsSelectionByTag = posts.Where(x => x.IsVisible() && String.Concat(x.Value<IEnumerable<string>>("blogTags").Select(x => x).ToArray()).Contains(queryTag.ToString()));
+                            <div class="row">
+                              @foreach (var item in postsSelectionByTag)
+                              {
+                                Traverse(item);
+                                i++;
+                              }
+                            </div>
+                          }
+                          else
+                          {
+                            @*List All*@
+                            var page = 1;
+                            int.TryParse(HttpContextAccessor.HttpContext.Request.Query["page"], out page);
+                            var totalPages = (int)Math.Ceiling((double)posts.Count() / (double)pageSize);
+                
+                            if (page > totalPages)
+                            {
+                              page = totalPages;
+                            }
+                            else if (page < 1)
+                            {
+                              page = 1;
+                            }
+                
+                            <div class="row">
+                              @*@foreach (var item in posts){*@
+                              @foreach (var item in posts.Skip((page - 1) * pageSize).Take(pageSize))
+                              {
+                                Traverse(item);
+                                i++;
+                              }
+                            </div>
+                
+                            if (totalPages > 1)
+                            {
+                              <div class="pagination">
+                                <ul>
+                                  @if (page > 1)
+                                  {
+                                    <li><a href="?page=@(page - 1)">@Html.Raw(Umbraco.GetDictionaryValue("previous"))</a></li>
+                                  }
+                                  @for (int p = 1; p < totalPages + 1; p++)
+                                  {
+                                    <li class="@(p == page ? "active" : string.Empty)">
+                                      <a href="?page=@p">@p</a>
+                                    </li>
+                                  }
+                                  @if (page < totalPages)
+                                  {
+                                    <li><a href="?page=@(page + 1)">@Html.Raw(Umbraco.GetDictionaryValue("next"))</a></li>
+                                  }
+                                </ul>
+                              </div>
+                            }
+                          }
+                        }
+                        
+    </div>
+</div>
+
+
+
+@Html.GetBlockListHtml(Model, "bodySections")
+
+
+    
+    
+@*Blog Post*@
+@{
+  void Traverse(IPublishedContent? item)
+  {
+
+
+
+    <div class="col-md-6 col-xxl-4 post-box-holder">
+      <div class="post-box">
+
+          @if (item.HasValue("imageForListing")){
+
+            IPublishedContent img = item.Value<IPublishedContent>("imageForListing");
+            if (img != null)
+            {
+              <div class="img-holder">
+                <a href="@Html.Raw(item.Url())" title="@Html.Raw(item.Value("menuTitle"))">
+                  <picture>
+                    @*<source srcset="@img.GetCropUrl("horizontal-xs")&quality=70&format=webp" media="(min-width: 768px)" type="image/webp">
+                    <source srcset="@img.GetCropUrl("horizontal-xs")&quality=70" media="(min-width: 768px)" type="image/jpeg">*@
+                    <source srcset="@img.GetCropUrl("horizontal")&quality=70&format=webp" media="(min-width: 0px)" type="image/webp">
+                    <source srcset="@img.GetCropUrl("horizontal")&quality=70" media="(min-width: 0px)" type="image/jpeg">
+                    <img src="@img.GetCropUrl("horizontal")&quality=70" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", img)" class="img-fluid ">
+                  </picture>
+                </a>
+              </div>
+            }
+          }
+          
+          <h2 class="h3">
+            <a href="@Html.Raw(item.Url())" title="@Html.Raw(item.Value("postTitle"))">@Html.Raw(item.Value("postTitle"))</a>
+          </h2>
+
+          <p class="date">@(item.Value<DateTime>("publishedDate").ToString("dd MMMM yyyy"))</p>  
+            
+          @* @if (item.HasValue("shortDescription")){
+            <div class="pb-3">@Html.Raw(item.Value("shortDescription"))&hellip;</div>
+          }*@
+          @if (item.HasValue("shortDescription"))
+          {
+            <div class="text">
+              @{
+                TruncateDescriptionAtWord(item.Value("shortDescription").ToString(), 170);
+              }
+            </div>
+          }
+          else
+          {
+            <div class="text">
+              @{
+                TruncateBodyAtWord(item.Value("bodyText").ToString(), 170);
+              }
+            </div>
+          }
+          
+
+          @if (item.HasValue("blogTags"))
+          {
+            var tags = item.Value<IEnumerable<string>>("blogTags");
+            <ul class="tags mt-3">
+              @foreach (var tag in tags.Take(2))
+              {
+                <li class="tag truncated-tag"><a href="@Html.Raw(Model.Url() + "?tag=" + @tag.ToString().Replace(" ", "-"))">@Html.Raw(tag)</a></li>
+              }
+            </ul>
+          }
+
+
+      </div>
+    </div>
+  }
+}
+
+
+
+
+@*ShortDescription substring*@
+@{
+  void TruncateDescriptionAtWord(string? input, int length, bool appendDots = true)
+  {
+    if (input == null || input.Length < length)
+    {
+      @Html.Raw(input)
+    }
+    else
+    {
+      var iNextSpace = input.LastIndexOf(" ", length, StringComparison.Ordinal);
+      var trimmedInput = string.Format("{0}", input.Substring(0, (iNextSpace > 0) ? iNextSpace : length).Trim());
+
+      if (appendDots)
+      {
+        @Html.Raw(trimmedInput) @Html.Raw("...")
+      }
+      else
+      {
+        @Html.Raw(trimmedInput)
+      }
+    }
+  }
+
+}
+
+@*BodyText substring*@
+@{
+  void TruncateBodyAtWord(string? htmlString, int length)
+  {
+    var tagRegex = new Regex("<[^>]*>"); @*stripHtml*@
+    if (htmlString.Length > length)
+    {
+      var str = tagRegex.Replace(htmlString, "");
+
+      if (str == null || str.Length < length)
+      {
+        @Html.Raw(str)
+      }
+      else
+      {
+        var iNextSpace = str.LastIndexOf(" ", length, StringComparison.Ordinal);
+        var trimmedInput = string.Format("{0}", str.Substring(0, (iNextSpace > 0) ? iNextSpace : length).Trim());
+        @Html.Raw(trimmedInput) @Html.Raw("...")
+      }
+    }
+  }
+}

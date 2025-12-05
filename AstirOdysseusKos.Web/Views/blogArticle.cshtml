@@ -1,0 +1,99 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.BlogArticle>
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+@using Umbraco.Cms.Core.Models
+@{
+	Layout = "MainTemplate.cshtml";
+    var blogNode = Model.Parent;
+}
+<div class="page-bodytext-section blog-post-page py-offset"> 
+    <div class="container"> 
+    
+        <div class="row">
+            <div class="col-12 col-md-8 text-md-start">
+
+                @if (Model.HasValue("imageForListing"))
+                {
+                  IPublishedContent img = Model.Value<IPublishedContent>("imageForListing");
+                  if (img != null)
+                  {
+                    <div class="colImg">
+                      <picture>
+                        <source srcset="@img.Url()?width=880&&quality=70&format=webp" media="(min-width: 480px)" type="image/webp">
+                        <source srcset="@img.Url()?width=880&quality=70" media="(min-width: 480px)" type="image/jpeg">
+                        <source srcset="@img.Url()?width=480&quality=70&format=webp" media="(min-width: 0px)" type="image/webp">
+                        <source srcset="@img.Url()?width=480&quality=70" media="(min-width: 0px)" type="image/jpeg">
+                        <img src="@img.Url()?width=480&quality=70" alt="@Html.Partial("/Views/Partials/Shared/_AltTextImage.cshtml", img)" class="img-fluid loading-lazy">
+                      </picture>
+                    </div>
+                  }
+                }
+                <h1 class="h2">
+                    @Html.Raw(Model.Value("postTitle"))
+                </h1>
+                <div class="date">@Html.Raw(Model.Value<DateTime>("publishedDate").ToString("dddd, MMMM dd, yyyy"))</div>
+                @Model.Value("bodyText")
+                
+                
+                <div class="prevNextWrap mt-5">
+                  @{
+                    IPublishedContent nextPublishedContentItem = default(IPublishedContent);
+                    IPublishedContent prevPublishedContentItem = default(IPublishedContent);
+                    IndexedArrayItem<IPublishedContent>[] indexedSiblings = Model.SiblingsAndSelf().OrderByDescending(x => x.Value<DateTime>("publishedDate")).ToIndexedArray();
+                    IndexedArrayItem<IPublishedContent> currentContentItem = indexedSiblings.FirstOrDefault(x => x.Content.Id == Model.Id);
+                    @*Prev*@           
+                                  if (currentContentItem.IsNotFirst())
+                                  {
+                      IndexedArrayItem<IPublishedContent> nextItem = indexedSiblings[currentContentItem.Index - 1];
+                      prevPublishedContentItem = nextItem.Content;
+                      <a href="@Html.Raw(prevPublishedContentItem.Url())" class="prev">@Html.Raw(Umbraco.GetDictionaryValue("previous"))</a>
+                    }
+                    else
+                    {
+                      <a href="#" class="disabled prev" onclick="return false;">@Html.Raw(Umbraco.GetDictionaryValue("previous"))</a>
+                    }
+                    @*Next*@
+                    if (currentContentItem.IsNotLast())
+                    {
+                      IndexedArrayItem<IPublishedContent> nextItem = indexedSiblings[currentContentItem.Index + 1];
+                      nextPublishedContentItem = nextItem.Content;
+                      <a href="@Html.Raw(nextPublishedContentItem.Url())" class="next">@Html.Raw(Umbraco.GetDictionaryValue("next"))</a>
+                    }
+                    else
+                    {
+                      <a href="#" class="disabled next" onclick="return false;">@Html.Raw(Umbraco.GetDictionaryValue("next"))</a>
+                    }
+                  }
+                </div>
+            
+            
+            </div>
+            
+            <div class="col-12 col-md-4">
+               <div class="ps-xxl-5 sidebar-tags">
+                    <div class="tags-group-title cat h3">Categories</div>
+                    @Html.Partial("~/views/partials/Blog/blogCategories.cshtml")
+                         
+                         
+                    @if (Model.HasValue("blogTags")){
+                        var tags = Model.Value<IEnumerable<string>>("blogTags");
+                        <div class="tags-group-title h3">Tags</div>
+                        <ul class="tags">
+                          @foreach (var tag in tags)
+                          {
+                            <li class="tag"><a href="@Html.Raw(blogNode.Url() + "?tag=" + @tag.ToString().Replace(" ", "-"))">@Html.Raw(tag)</a></li>
+                          }
+                        </ul>
+                    }
+                </div> 
+            </div>
+        </div>    
+    
+
+    </div>
+</div>
+
+
+
+@Html.GetBlockListHtml(Model, "bodySections")
+
