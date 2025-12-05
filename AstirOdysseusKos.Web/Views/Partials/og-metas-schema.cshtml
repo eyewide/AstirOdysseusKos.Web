@@ -1,0 +1,68 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+
+    var root = Model.Root();
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="@Model.Url(mode:UrlMode.Absolute)" />
+
+    if (Model.IsDocumentType("blogArticle")) {
+        <meta property="og:title" content="@Model.Value("postTitle")">
+    }else if (Model.IsDocumentType("homepage")) {  
+        <meta property="og:title" content="@Model.Value("metaTitle")">
+    }else{
+        <meta property="og:title" content="@Html.Raw(Model.Value("menuTitle"))">
+        
+    }
+    
+    @if (Model.HasValue("shortDescription")){
+        <meta property="og:description" content="@{TruncateDescriptionAtWord(Model.Value("shortDescription").ToString(), 170);}">
+    }else{
+        <meta property="og:description" content="@Html.Raw(Model.Value("metaDescription"))">
+    }
+                                
+
+
+    if (Model.IsDocumentType("blogArticle")) {
+        var tempImg=Model.Value<IPublishedContent>("imageForListing");
+        <meta property="og:image" content="@(tempImg!=null ? tempImg.Url(mode:UrlMode.Absolute) : null)" />
+   @* }else if (Model.IsDocumentType("homepage")) {    
+        var tempImg=Model.Value<IPublishedContent>("txtImage");
+        <meta property="og:image" content="@(tempImg!=null ? tempImg.Url(mode:UrlMode.Absolute) : null)" />   *@
+    }else if (Model.HasValue("imageForListing")){
+        var tempImg=Model.Value<IPublishedContent>("imageForListing");
+        <meta property="og:image" content="@(tempImg!=null ? tempImg.Url(mode:UrlMode.Absolute) : null)" />
+  @*  }else if (Model.HasValue("imagesSlider")){
+        var tempImg = Model.Value<IEnumerable<IPublishedContent>>("imagesSlider").FirstOrDefault();
+        <meta property="og:image" content="@(tempImg!=null ? tempImg.Url(mode:UrlMode.Absolute) : null)" />
+    }else{
+        var tempImg=root.Value<IEnumerable<IPublishedContent>>("imagesSlider").FirstOrDefault();
+        <meta property="og:image" content="@(tempImg!=null ? tempImg.Url(mode:UrlMode.Absolute) : null)" />*@
+    }
+    <meta property="og:image:type" content="image/jpeg" />
+
+}
+
+
+
+
+ @{
+    void TruncateDescriptionAtWord(string? input, int length, bool appendDots = true)
+    {
+        if (input == null || input.Length < length){
+            @Html.Raw(input)
+        }else{
+            var iNextSpace = input.LastIndexOf(" ", length, StringComparison.Ordinal);
+            var trimmedInput = string.Format("{0}", input.Substring(0, (iNextSpace > 0) ? iNextSpace : length).Trim());
+        
+            if (appendDots)
+            {
+                @Html.Raw(trimmedInput) @Html.Raw("...")
+            }else{
+                @Html.Raw(trimmedInput) 
+            }
+        }
+    }
+    
+}
+ 

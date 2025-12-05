@@ -18,14 +18,14 @@ using Umbraco.Extensions;
 
 namespace Umbraco.Cms.Web.Common.PublishedModels
 {
-	/// <summary>offers</summary>
-	[PublishedModel("offers")]
-	public partial class Offers : PublishedContentModel, INavigation, ISEO, ISlider
+	/// <summary>Blog</summary>
+	[PublishedModel("blog")]
+	public partial class Blog : PublishedContentModel, INavigation, ISEO
 	{
 		// helpers
 #pragma warning disable 0109 // new is redundant
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
-		public new const string ModelTypeAlias = "offers";
+		public new const string ModelTypeAlias = "blog";
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
 		public new const PublishedItemType ModelItemType = PublishedItemType.Content;
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
@@ -34,14 +34,14 @@ namespace Umbraco.Cms.Web.Common.PublishedModels
 			=> PublishedModelUtility.GetModelContentType(publishedSnapshotAccessor, ModelItemType, ModelTypeAlias);
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
 		[return: global::System.Diagnostics.CodeAnalysis.MaybeNull]
-		public static IPublishedPropertyType GetModelPropertyType<TValue>(IPublishedSnapshotAccessor publishedSnapshotAccessor, Expression<Func<Offers, TValue>> selector)
+		public static IPublishedPropertyType GetModelPropertyType<TValue>(IPublishedSnapshotAccessor publishedSnapshotAccessor, Expression<Func<Blog, TValue>> selector)
 			=> PublishedModelUtility.GetModelPropertyType(GetModelContentType(publishedSnapshotAccessor), selector);
 #pragma warning restore 0109
 
 		private IPublishedValueFallback _publishedValueFallback;
 
 		// ctor
-		public Offers(IPublishedContent content, IPublishedValueFallback publishedValueFallback)
+		public Blog(IPublishedContent content, IPublishedValueFallback publishedValueFallback)
 			: base(content, publishedValueFallback)
 		{
 			_publishedValueFallback = publishedValueFallback;
@@ -72,6 +72,29 @@ namespace Umbraco.Cms.Web.Common.PublishedModels
 		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
 		[ImplementPropertyType("headerH1")]
 		public virtual string HeaderH1 => this.Value<string>(_publishedValueFallback, "headerH1");
+
+		///<summary>
+		/// Image for Listing
+		///</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
+		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
+		[ImplementPropertyType("imageForListing")]
+		public virtual global::Umbraco.Cms.Core.Models.MediaWithCrops ImageForListing => this.Value<global::Umbraco.Cms.Core.Models.MediaWithCrops>(_publishedValueFallback, "imageForListing");
+
+		///<summary>
+		/// Page Size: post per view - pagination
+		///</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
+		[ImplementPropertyType("pageSize")]
+		public virtual int PageSize => this.Value<int>(_publishedValueFallback, "pageSize");
+
+		///<summary>
+		/// Short Description
+		///</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
+		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
+		[ImplementPropertyType("shortDescription")]
+		public virtual string ShortDescription => this.Value<string>(_publishedValueFallback, "shortDescription");
 
 		///<summary>
 		/// Show in Footer Menu
@@ -117,52 +140,5 @@ namespace Umbraco.Cms.Web.Common.PublishedModels
 		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
 		[ImplementPropertyType("metaTitle")]
 		public virtual string MetaTitle => global::Umbraco.Cms.Web.Common.PublishedModels.SEO.GetMetaTitle(this, _publishedValueFallback);
-
-		///<summary>
-		/// Fallback Video Url
-		///</summary>
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
-		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
-		[ImplementPropertyType("fallbackVideoUrl")]
-		public virtual string FallbackVideoUrl => global::Umbraco.Cms.Web.Common.PublishedModels.Slider.GetFallbackVideoUrl(this, _publishedValueFallback);
-
-		///<summary>
-		/// Hide Slider
-		///</summary>
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
-		[ImplementPropertyType("hideSlider")]
-		public virtual bool HideSlider => global::Umbraco.Cms.Web.Common.PublishedModels.Slider.GetHideSlider(this, _publishedValueFallback);
-
-		///<summary>
-		/// Images Slider
-		///</summary>
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
-		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
-		[ImplementPropertyType("imagesSlider")]
-		public virtual global::System.Collections.Generic.IEnumerable<global::Umbraco.Cms.Core.Models.MediaWithCrops> ImagesSlider => global::Umbraco.Cms.Web.Common.PublishedModels.Slider.GetImagesSlider(this, _publishedValueFallback);
-
-		///<summary>
-		/// Text on Slider
-		///</summary>
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
-		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
-		[ImplementPropertyType("textOnSlider")]
-		public virtual string TextOnSlider => global::Umbraco.Cms.Web.Common.PublishedModels.Slider.GetTextOnSlider(this, _publishedValueFallback);
-
-		///<summary>
-		/// Video Url
-		///</summary>
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
-		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
-		[ImplementPropertyType("videoUrl")]
-		public virtual string VideoUrl => global::Umbraco.Cms.Web.Common.PublishedModels.Slider.GetVideoUrl(this, _publishedValueFallback);
-
-		///<summary>
-		/// YouTube Video Url
-		///</summary>
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.1+dcbbed4")]
-		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
-		[ImplementPropertyType("youTubeVideoUrl")]
-		public virtual string YouTubeVideoUrl => global::Umbraco.Cms.Web.Common.PublishedModels.Slider.GetYouTubeVideoUrl(this, _publishedValueFallback);
 	}
 }
