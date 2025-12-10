@@ -1,8 +1,12 @@
+using AstirOdysseusKos.Tools.Client;
+using AstirOdysseusKos.Tools.NotificationHandler;
 using AstirOdysseusKos.Web.Models;
 using AstirOdysseusKos.Web.Services;
+using Eyewide.Tools.Helpers;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Options;
 using System.IO.Compression;
+using Umbraco.Cms.Core.Notifications;
 
 
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
@@ -18,47 +22,49 @@ builder.Services.AddOptions<EmailSettings>().Bind(_config.GetSection("EmailSetti
 
 builder.Services.AddResponseCompression(options =>
 {
-    options.EnableForHttps = true;
-    options.Providers.Add<BrotliCompressionProvider>();
-    options.Providers.Add<GzipCompressionProvider>();
-    options.MimeTypes = new[] { "text/plain", "text/html", "text/css", "application/javascript", "text/javascript", "image/svg+xml" };
+  options.EnableForHttps = true;
+  options.Providers.Add<BrotliCompressionProvider>();
+  options.Providers.Add<GzipCompressionProvider>();
+  options.MimeTypes = new[] { "text/plain", "text/html", "text/css", "application/javascript", "text/javascript", "image/svg+xml" };
 });
 
 builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
 {
-    options.Level = CompressionLevel.Fastest;
+  options.Level = CompressionLevel.Fastest;
 });
 
 builder.Services.Configure<GzipCompressionProviderOptions>(options =>
 {
-    options.Level = CompressionLevel.SmallestSize;
+  options.Level = CompressionLevel.SmallestSize;
 });
 
 builder.Services.AddTransient<IConfigureOptions<StaticFileOptions>, ConfigureStaticFileOptions>();
-builder.Services.AddScoped<IBlogService, BlogService>();
+//builder.Services.AddTransient<IUploadPostImage, UploadPostImage>();
+//builder.Services.AddScoped<IBlogService, BlogService>();
 
 builder.CreateUmbracoBuilder()
     .AddBackOffice()
     .AddWebsite()
     .AddDeliveryApi()
     .AddComposers()
+    //.AddNotificationAsyncHandler<UmbracoApplicationStartingNotification, ImportBlogPosts>()
     .Build();
 
 WebApplication app = builder.Build();
 
 if (builder.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();
+  app.UseDeveloperExceptionPage();
 }
-else
+else if (builder.Environment.IsStaging() || builder.Environment.IsProduction())
 {
-    app.UseResponseCompression();
-    /*   app.UseXfo(options => options.SameOrigin());
-       app.UseXContentTypeOptions();
-       app.UseCsp(opts => opts.UpgradeInsecureRequests());
-       app.UseHsts(options => options.MaxAge(days: 30).IncludeSubdomains());
-       app.UseXXssProtection(options => options.EnabledWithBlockMode());
-       app.UseReferrerPolicy(opts => opts.StrictOriginWhenCrossOrigin());*/
+  app.UseResponseCompression();
+  app.UseXfo(options => options.SameOrigin());
+  app.UseXContentTypeOptions();
+  app.UseCsp(opts => opts.UpgradeInsecureRequests());
+  app.UseHsts(options => options.MaxAge(days: 30).IncludeSubdomains());
+  app.UseXXssProtection(options => options.EnabledWithBlockMode());
+  app.UseReferrerPolicy(opts => opts.StrictOriginWhenCrossOrigin());
 }
 
 await app.BootUmbracoAsync();
@@ -68,14 +74,14 @@ app.UseHttpsRedirection();
 app.UseUmbraco()
     .WithMiddleware(u =>
     {
-        u.UseBackOffice();
-        u.UseWebsite();
+      u.UseBackOffice();
+      u.UseWebsite();
     })
     .WithEndpoints(u =>
     {
-        u.UseInstallerEndpoints();
-        u.UseBackOfficeEndpoints();
-        u.UseWebsiteEndpoints();
+      u.UseInstallerEndpoints();
+      u.UseBackOfficeEndpoints();
+      u.UseWebsiteEndpoints();
     });
 
 await app.RunAsync();

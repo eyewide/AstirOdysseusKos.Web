@@ -1,45 +1,73 @@
-﻿using System.Net.Http.Headers;
+﻿#region Using Directives
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using AstirOdysseusKos.Web.Models;
-namespace AstirOdysseusKos.Web.Services;
+using AstirOdysseusKos.Tools.Helpers;
+using AstirOdysseusKos.Tools.Model;
+using Eyewide.Tools.Helpers;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+#endregion
+namespace AstirOdysseusKos.Tools.Client;
+
 public class BlogService : IBlogService
 {
+  #region Fields
   private readonly HttpClient _httpClient;
   private readonly ILogger<BlogService> _logger;
   private readonly IConfiguration _configuration;
-  public BlogService(HttpClient httpClient, ILogger<BlogService> logger, IConfiguration configuration)
+  private readonly IUploadPostImage _uploadPostImage;
+  #endregion
+
+  #region Constructor
+  public BlogService(HttpClient httpClient, ILogger<BlogService> logger, IConfiguration configuration, IUploadPostImage uploadPostImage)
   {
     _httpClient = httpClient;
     _logger = logger;
     _configuration = configuration;
+    _uploadPostImage = uploadPostImage;
   }
-  public async Task<List<BlogPost>> GetAllBlogPostsAsync(int count, int skip = 0, int language = 1)
+  #endregion
+
+  #region Public Methods
+  public async Task<List<BlogPost>> GetAllBlogPostsAsync(int count, int skip, int language = 1)
   {
     var baseUrl = GetBaseUrl();
     var apiKey = GetApiKey();
     try
-    {
-      var request = new HttpRequestMessage(HttpMethod.Get, $"{baseUrl}/posts?_fields=id,slug,title,excerpt,featured_media,date");
+    {      
+      var request = new HttpRequestMessage(HttpMethod.Get, $"{baseUrl}/posts?_fields=id,slug,title,excerpt,content,categories,featured_media,date_gmt&order_by=id&order=asc&per_page={count}&offset={skip}");
       request.Headers.Authorization = new AuthenticationHeaderValue("Basic", apiKey);
       var response = await _httpClient.SendAsync(request);
       response.EnsureSuccessStatusCode();
+      var totalPosts = Int32.TryParse(response.Headers.GetValues("X-WP-Total").FirstOrDefault(), out int postTotal) ? postTotal : 0;
+      var totalPages = Int32.TryParse(response.Headers.GetValues("X-WP-TotalPages").FirstOrDefault(), out int pageTotal) ? pageTotal : 0;
       using var stream = await response.Content.ReadAsStreamAsync();
       using var doc = await JsonDocument.ParseAsync(stream);
       var blogPosts = new List<BlogPost>();
       var imageFetchTasks = new List<Task>();
       var semaphore = new SemaphoreSlim(5); // Limit concurrent image fetches
-      foreach (var post in doc.RootElement.EnumerateArray())
+      var root = doc.RootElement.EnumerateArray();
+      foreach (var post in root)
       {
         if (post.ValueKind != JsonValueKind.Object)
           continue;
+
+        var categoryIds = post.TryGetProperty("categories", out var categoriesProp) && categoriesProp.ValueKind == JsonValueKind.Array
+        ? categoriesProp.EnumerateArray().Where(c => c.TryGetInt32(out _)).Select(c => c.GetInt32()).ToList()
+        : new List<int>();
+
         var blogPost = new BlogPost
         {
           Id = post.TryGetProperty("id", out var idProp) && idProp.TryGetInt32(out int idVal) ? idVal : 0,
           Slug = post.TryGetProperty("slug", out var slugProp) ? slugProp.GetString() : string.Empty,
+          EncodedContent = post.TryGetProperty("content", out var contentProp) && contentProp.TryGetProperty("rendered", out var contentRendered) ? contentRendered.GetString() : string.Empty,
+
           Title = post.TryGetProperty("title", out var titleProp) && titleProp.TryGetProperty("rendered", out var titleRendered) ? titleRendered.GetString() : string.Empty,
           Excerpt = post.TryGetProperty("excerpt", out var excerptProp) && excerptProp.TryGetProperty("rendered", out var excerptRendered) ? excerptRendered.GetString() : string.Empty,
-          PublishedDate = post.TryGetProperty("date", out var dateProp) && dateProp.ValueKind == JsonValueKind.String && DateTime.TryParse(dateProp.GetString(), out DateTime dateVal) ? dateVal : DateTime.MinValue
+          Category = new BlogCategories().Categories.Where(m => m.Key == categoryIds.FirstOrDefault()).Select(m => m.Value).FirstOrDefault() ?? string.Empty,
+
+          PublishedDate = post.TryGetProperty("date_gmt", out var dateProp) && dateProp.ValueKind == JsonValueKind.String && DateTime.TryParse(dateProp.GetString(), out DateTime dateVal) ? dateVal : DateTime.MinValue
         };
         if (post.TryGetProperty("featured_media", out var fmProp) && fmProp.TryGetInt32(out int mediaId) && mediaId > 0)
         {
@@ -56,14 +84,26 @@ public class BlogService : IBlogService
             }
           });
           imageFetchTasks.Add(t);
-        }
+        }        
         blogPosts.Add(blogPost);
       }
       await Task.WhenAll(imageFetchTasks);
+      foreach (var post in blogPosts)
+      {
+        if (post.FeaturedImage != null && !string.IsNullOrEmpty(post.FeaturedImage.SourceUrl))
+        {
+          try
+          {
+            post.ImageToUpload = _uploadPostImage.UploadMediaItem(post.FeaturedImage.SourceUrl, 6403);
+          }
+          catch (Exception ex)
+          {
+            _logger.LogWarning(ex, "Failed to upload image for post {PostId} from URL {ImageUrl}", post.Id, post.FeaturedImage.SourceUrl);
+          }
+        }
+      }
       return blogPosts
         .OrderByDescending(bp => bp.PublishedDate)
-        .Skip(skip)
-        .Take(count)
         .ToList();
     }
     catch (Exception ex)
@@ -81,12 +121,15 @@ public class BlogService : IBlogService
     request.Headers.Authorization = new AuthenticationHeaderValue("Basic", apiKey);
     using var response = await _httpClient.SendAsync(request);
     response.EnsureSuccessStatusCode();
-    using var stream = await response.Content.ReadAsStreamAsync();    
+    using var stream = await response.Content.ReadAsStreamAsync();
     using JsonDocument doc = await JsonDocument.ParseAsync(stream);
-    if (doc.RootElement.TryGetProperty("source_url", out var src)) featuredImage.SourceUrl = src.GetString() ?? string.Empty;
-    if (doc.RootElement.TryGetProperty("alt_text", out var alt)) featuredImage.AltText = alt.GetString() ?? string.Empty;
-    if (doc.RootElement.TryGetProperty("slug", out var slug)) featuredImage.Slug = slug.GetString() ?? string.Empty;
-    if (doc.RootElement.TryGetProperty("media_details",  out var mediaDetails) && mediaDetails.TryGetProperty("sizes", out var sizes))
+    if (doc.RootElement.TryGetProperty("source_url", out var src))
+      featuredImage.SourceUrl = src.GetString() ?? string.Empty;
+    if (doc.RootElement.TryGetProperty("alt_text", out var alt))
+      featuredImage.AltText = alt.GetString() ?? string.Empty;
+    if (doc.RootElement.TryGetProperty("slug", out var slug))
+      featuredImage.Slug = slug.GetString() ?? string.Empty;
+    if (doc.RootElement.TryGetProperty("media_details", out var mediaDetails) && mediaDetails.TryGetProperty("sizes", out var sizes))
     {
       foreach (var size in sizes.EnumerateObject())
       {
@@ -114,7 +157,7 @@ public class BlogService : IBlogService
     var apiKey = GetApiKey();
     try
     {
-      var request = new HttpRequestMessage(HttpMethod.Get, $"{baseUrl}/posts/{id}?_fields=id,slug,title,excerpt,featured_media,date");
+      var request = new HttpRequestMessage(HttpMethod.Get, $"{baseUrl}/posts/{id}?_fields=id,slug,title,excerpt,featured_media,tags,categories,date_gmt,content");
       request.Headers.Authorization = new AuthenticationHeaderValue("Basic", apiKey);
       var response = await _httpClient.SendAsync(request);
       response.EnsureSuccessStatusCode();
@@ -123,13 +166,18 @@ public class BlogService : IBlogService
       var root = doc.RootElement;
       if (root.ValueKind != JsonValueKind.Object)
         return new BlogPost();
+      var categoryIds = root.TryGetProperty("categories", out var categoriesProp) && categoriesProp.ValueKind == JsonValueKind.Array
+        ? categoriesProp.EnumerateArray().Where(c => c.TryGetInt32(out _)).Select(c => c.GetInt32()).ToList()
+        : new List<int>();
       var blogPost = new BlogPost
       {
         Id = root.TryGetProperty("id", out var idProp) && idProp.TryGetInt32(out int idVal) ? idVal : 0,
         Slug = root.TryGetProperty("slug", out var slugProp) ? slugProp.GetString() ?? string.Empty : string.Empty,
+        EncodedContent = root.TryGetProperty("content", out var contentProp) && contentProp.TryGetProperty("rendered", out var contentRendered) ? contentRendered.GetString() : string.Empty,
         Title = root.TryGetProperty("title", out var titleProp) && titleProp.TryGetProperty("rendered", out var titleRendered) ? titleRendered.GetString() : string.Empty,
         Excerpt = root.TryGetProperty("excerpt", out var excerptProp) && excerptProp.TryGetProperty("rendered", out var excerptRendered) ? excerptRendered.GetString() : string.Empty,
-        PublishedDate = root.TryGetProperty("date", out var dateProp) && dateProp.ValueKind == JsonValueKind.String && DateTime.TryParse(dateProp.GetString(), out DateTime dateVal) ? dateVal : DateTime.MinValue
+        Category = new BlogCategories().Categories.Where(m => m.Key == categoryIds.FirstOrDefault()).Select(m => m.Value).FirstOrDefault() ?? string.Empty,
+        PublishedDate = root.TryGetProperty("date_gmt", out var dateProp) && dateProp.ValueKind == JsonValueKind.String && DateTime.TryParse(dateProp.GetString(), out DateTime dateVal) ? dateVal : DateTime.MinValue
       };
       if (root.TryGetProperty("featured_media", out var fmProp) && fmProp.TryGetInt32(out int mediaId) && mediaId > 0)
       {
@@ -151,6 +199,9 @@ public class BlogService : IBlogService
       return new BlogPost();
     }
   }
+  #endregion
+
+  #region Private (helper) Methods
   private string GetApiKey()
   {
     var apiUsername = _configuration["BlogSettings:Username"];
@@ -162,4 +213,5 @@ public class BlogService : IBlogService
   {
     return _configuration["BlogSettings:BaseUrl"];
   }
+  #endregion
 }
