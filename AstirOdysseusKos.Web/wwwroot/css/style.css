@@ -923,7 +923,7 @@ header .left-col { /*btn space holder*/
 }
 @media only screen and (min-width: 768px){
     #main-navigation .main-menu .menu.level-1 {
-        width:300px;   
+        width:320px;   
     }
 }    
     
@@ -955,9 +955,9 @@ header .left-col { /*btn space holder*/
 }
 @media only screen and (min-width: 768px){
     #main-navigation .main-menu .menu.submenu{
-        width:calc(60vw - 200px);
+        width:calc(60vw - 300px);
         position:absolute;
-        left:300px;
+        left:340px;
         padding-left:1.800em;
         top:0.52em;
        /* font-size:0.83em;*/
@@ -2678,6 +2678,59 @@ footer {
 .privacyList ul ul li{
     list-style: circle;
 }
+
+/*Career Positions Details -
+=============================*/
+
+.careers-list .accordion-item:first-of-type,
+.careers-list .accordion-item:first-of-type .accordion-button,
+.careers-list .accordion-item:last-of-type,
+.careers-list .accordion-item:last-of-type .accordion-button{
+    border-radius:0;
+}
+.accordion-header .accordion-button {
+    background: var(--white);
+    padding:0px;
+    text-decoration:none;
+      font-size: 22px;
+      padding:12px;
+      font-weight:400;
+      
+}  
+.accordion-header .accordion-button:hover {
+        background: var(--grey-bg);
+}
+.accordion-button:not(.collapsed) {
+    color: var(--main-color);
+}
+.accordion-header h3 {
+    margin:3px;
+}
+.accordion-header a:hover{
+    text-decoration:none;
+}
+.accordion_page .accordion-button::after {
+    margin-right:15px;
+}
+.accordion_page .accordion-body {
+      padding:15px;  
+}
+@media (max-width:1199px){
+    .accordion_page .accordion-body {
+          padding:20px;  
+    }
+}
+.accordion_page .accordion-body ul{
+    margin: 0 0 15px 30px;
+}
+.accordion_page .accordion-body .note {
+    font-style: italic;
+    font-size: 15px;
+    color: var(--main-color);
+    font-weight: 600;
+    padding-top: 15px;
+}
+
 /** NEWSLETTER 
 ===========================**/
 .newsletter {

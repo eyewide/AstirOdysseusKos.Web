@@ -236,7 +236,7 @@
     <footer class="px-container-space bg-color">
         <div class="">
             @* ===== NEWSLETTER =======  *@
-            @if(!Model.IsDocumentType("form")){
+            @if(!Model.IsDocumentType("form") && !Model.IsDocumentType("formCareer")){
                 <div class="container mt-offset">
                     <div class="row g-0">
                         <div class="@(Model.IsDocumentType("form") ? "col-12" : "col-md-5") map"> 

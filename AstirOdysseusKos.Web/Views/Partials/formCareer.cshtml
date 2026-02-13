@@ -1,0 +1,118 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<AstirOdysseusKos.Web.Models.formCareerViewModel>
+@using AstirOdysseusKos.Web.Controllers
+@using AstirOdysseusKos.Web.Models
+@using Microsoft.Extensions.Configuration
+@using Microsoft.Extensions.Options
+@using Umbraco.Cms.Core.Models.Blocks;
+
+@{
+	var node = Umbraco.Content(Umbraco.AssignedContentItem.Id);
+	var home = node.AncestorsOrSelf("homepage").First();
+}
+
+
+@using (Html.BeginUmbracoForm<formCareerController>("Submit", FormMethod.Post, new { id = "CareerForm", @class = "contactForm form-inline validateForm" }))
+{
+         <div class="row mt-5">
+            <div class="form-group col-md-6 col-sm-6 mb-3 text-start">
+                <div class="">
+                @Html.LabelFor(x => Model.attachment, @Umbraco.GetDictionaryValue("form_CV") + " *", new { @class = "attachment-field" })
+    		    @Html.TextBoxFor(x => Model.attachment, new {  @class = "form-control", type = "file"})
+    		    </div>
+    		    @Html.ValidationMessageFor(x => Model.attachment, @Umbraco.GetDictionaryValue("form_CV") + " " + @Umbraco.GetDictionaryValue("form_required"), new { @class = "upload-valid-js" })
+    			<span id="approvedFiles" class="field-validation-error"></span>
+    
+         </div>
+         
+         <div class="form-group col-md-6 col-sm-6 mb-3 text-start">
+                @Html.LabelFor(x => Model.Position, @Umbraco.GetDictionaryValue("form_Position"))
+                <select name="Position" id="Position" class="form-control">
+                <option selected="selected" value="">@Umbraco.GetDictionaryValue("form_PositionSelect")</option>
+
+                @if (node.Value<IEnumerable<BlockListItem>>("jobPositions").Count()>0){
+                    var personsBlocks = node.Value<IEnumerable<BlockListItem>>("jobPositions");
+                    foreach (var block in personsBlocks){
+                        var content = block.Content;
+                        if (block.Settings.Value("disableSection").ToString()!="True"){
+                            <option>@content.Value("title")</option>
+                        }
+                    }
+                }
+                <option>@Umbraco.GetDictionaryValue("form_Position_Other")</option>
+            </select>
+           
+            </div>
+    
+
+             <div class="form-group col-md-6 col-sm-6 mb-3">	
+    	        @Html.LabelFor(x => Model.Name, @Umbraco.GetDictionaryValue("form_fName")+ " *", new { @class = "visually-hidden" })
+                @Html.TextBoxFor(x => Model.Name, new { @class = "form-control required", @placeholder = @Umbraco.GetDictionaryValue("form_fName") + " *" })
+                @Html.ValidationMessageFor(x => Model.Name, @Umbraco.GetDictionaryValue("form_fName") + " " + @Umbraco.GetDictionaryValue("form_required"))
+            </div>
+            
+            <div class="form-group col-md-6 col-sm-6 mb-3">
+                @Html.LabelFor(x => Model.Surname, @Umbraco.GetDictionaryValue("form_lname")+" *", new { @class = "visually-hidden" })	
+                @Html.TextBoxFor(x => Model.Surname, new { @class = " form-control", @placeholder = @Umbraco.GetDictionaryValue("form_lname") + " *" })
+                @Html.ValidationMessageFor(x => Model.Surname, @Umbraco.GetDictionaryValue("form_lname") + " " + @Umbraco.GetDictionaryValue("form_required"))
+            </div>
+            
+             <div class="form-group col-md-6 col-sm-6 mb-3">	
+                @Html.LabelFor(x => Model.Email, @Umbraco.GetDictionaryValue("form_email")+" *", new { @class = "visually-hidden" })
+                @Html.TextBoxFor(x => Model.Email, new { @class = " form-control", @placeholder = @Umbraco.GetDictionaryValue("form_email") + " *" })
+                @Html.ValidationMessageFor(x => Model.Email, @Umbraco.GetDictionaryValue("form_email") + " " + @Umbraco.GetDictionaryValue("form_required"))
+            </div>
+            
+            <div class="form-group col-md-6 col-sm-6 mb-3">	
+                @Html.LabelFor(x => Model.Telephone, @Umbraco.GetDictionaryValue("form_telephone")+" *", new { @class = "visually-hidden" })
+                @Html.TextBoxFor(x => Model.Telephone, new { @class = " form-control", @placeholder = @Umbraco.GetDictionaryValue("form_telephone") + " *" })
+                @Html.ValidationMessageFor(x => Model.Telephone, @Umbraco.GetDictionaryValue("form_telephone") + " " + @Umbraco.GetDictionaryValue("form_required"))
+            </div>
+            <div class="form-group col-md-12 col-sm-12 mb-3">
+                @Html.LabelFor(x => Model.Message, @Umbraco.GetDictionaryValue("form_Message"), new { @class = "visually-hidden" })
+                @Html.TextAreaFor(x => Model.Message, new {@class="form-control", @rows="5",  @placeholder = @Umbraco.GetDictionaryValue("form_Message")})
+            </div> 
+
+    	   <div class="col-12 mb-1 text-start">
+    	       <div class="form-agree mt-2">
+    			@Html.CheckBoxFor(x => Model.Agree, new { @class = "required" })
+    			<label for="Agree">
+    				@Html.Raw(Umbraco.GetDictionaryValue("form_agree"))
+    			</label>
+    		    @Html.ValidationMessageFor(x => Model.Agree, @Umbraco.GetDictionaryValue("form_required"))
+    		    </div>
+    		</div>
+        </div>
+
+            <div class="m-0">
+    		    <label><span class="invisible">hp field</span>
+                    <honeypot-field></honeypot-field>
+                </label>
+                <label><span class="invisible">hp time</span>
+                    <honeypot-time></honeypot-time>
+                </label>
+            </div>
+        
+        <p role="alert" class="status-failure" hidden>
+            Connection failure, please try again.
+        </p>
+        <p role="alert" class="status-busy" hidden>
+            <img src="/images/loader.svg" alt="sending form"/>
+        </p>
+        
+        
+		<div class="col-md-12 col-sm-12 submit mt-3 submit">
+            <button type="submit" id="send" class="btn btn--more">@Html.Raw(Umbraco.GetDictionaryValue("form_Send"))</button>
+        </div>
+
+}
+@*
+<script>
+(function() {
+    onCompleted = function() {
+        document.getElementById("NewsletterForm").submit();
+    }
+})();
+</script>*@
+
+
+

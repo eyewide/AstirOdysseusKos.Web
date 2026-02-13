@@ -1,0 +1,75 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using Umbraco.Cms.Core.Models.Blocks;
+@using AstirOdysseusKos.Web.Models 
+@{
+	Layout = "MainTemplate.cshtml";
+}
+
+
+<div class="page-bodytext-section py-offset"> 
+    <div class="container"> @*content-max-width text-content*@
+        <h1>
+            @Html.Raw(Model.Value("headerH1"))
+        </h1>
+         @Model.Value("bodyText")
+         
+        @*JOB Positions ======================*@
+        @if (Model.Value<IEnumerable<BlockListItem>>("jobPositions").Count()>0){
+            var blockItems = Model.Value<IEnumerable<BlockListItem>>("jobPositions");
+            var i=1;
+            <div class="py-5 mb-5 careers-list">
+                <div class="col-md-8 m-auto">
+                    <h2 class="h3">@Umbraco.GetDictionaryValue("header-JobOpenings")</h2>
+                    <div class="accordion">
+                        @foreach (var block in blockItems){
+                            var content = block.Content;
+                            if (block.Settings.Value("disableSection").ToString()!="True"){
+                                var question=content.Value("title").ToString();
+                                var answer=content.Value("text").ToString();
+                              
+                            <div class="accordion-item">
+                                @if (!string.IsNullOrEmpty(question)){
+                                    <div class="accordion-header">
+                					  <h3 class="@(!string.IsNullOrEmpty(answer) ? "more-arrow clearfix" : "no-arrow clearfix")">
+                						<a type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="@Html.Raw("#pos"+@i)" aria-expanded="false" aria-controls="@Html.Raw("pos"+@i)">
+                							<span class="heading">@Html.Raw(question)</span> 
+                						</a>
+                					  </h3>
+                					</div>
+                                }
+                                @if (!string.IsNullOrEmpty(answer)){
+                                    <div id="@Html.Raw("pos"+@i)" class="accordion-collapse collapse" aria-labelledby="@Html.Raw("pos"+@i)">
+            						  <div class="accordion-body text-start">
+            								<div>@Html.Raw(@Html.Raw(answer))</div>
+            						  </div>
+            						</div>
+                                }
+                            </div>
+                            i++;
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+        @*END JOBS ======================*@   
+    </div>
+</div>
+
+<div class="container-fluid bg-white">
+    <div class="row">
+        <div class="col-12 col-md-7 order-md-2 m-auto">
+                  <div class="form-holder">
+                        <h2 class="">@Umbraco.GetDictionaryValue("header-CareerForm")</h2>
+      
+            @{
+                Html.RenderPartial("~/Views/Partials/formCareer.cshtml", new formCareerViewModel());
+            }
+            </div>
+        </div>
+    </div>
+</div>  
+
+
+@Html.GetBlockListHtml(Model, "bodySections")

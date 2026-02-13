@@ -10,6 +10,9 @@
         public List<string> mailTo { get; set; }
         public List<string> mailToNewsletter { get; set; }
         public List<string> mailToRequest { get; set; }
+        public List<string> mailToCareer { get; set; }
+        
+
         public string nameSubject { get; set; }
     }
 }
